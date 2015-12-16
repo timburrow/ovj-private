@@ -1973,7 +1973,6 @@
         style="Label1"
         vq="cpprefs"
         label="By default, autoprocess NUS data using.."
-        show="$ENABLE=(cpprefs[82]='yes')*2-1"
         />
       <radio loc="265 60" size="60 25"
         style="Label1"

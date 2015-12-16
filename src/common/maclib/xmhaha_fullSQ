@@ -254,7 +254,7 @@ IF ($1='set') THEN
     write('fileline',$xml,'type="protocol" exp="grandparent" lock="off" ')
     write('fileline',$xml,'id="tmpstudy" tooltext="%s" expanded="true">\n',$ttxt)
     write('reset',$sqdir+'/cpnodeinfo')
-    shell('cp '+$xml+' '+$xml3):$dum
+    shell('cp "'+$xml+'" "'+$xml3+'"'):$dum
 
     $filter='Completed','Spectrum','Craft','Error','Queued','Day_queued','Night_queued'
     pwd:$curdir

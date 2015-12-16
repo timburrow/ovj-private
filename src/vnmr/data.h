@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #ifndef DATA_H
@@ -514,7 +514,8 @@ typedef struct hypercmplxbhead	hycmplxhead;
 
 /* Bits 11-14 */
 #define S_CM		0x800   /* 1 = Chem. Magnetics data   	*/ 
-#define S_GE		0x1000  /* 1 = GE data			*/ 
+#define S_GE		0x1000  /* 1 = GE data (obsolete)	*/ 
+#define S_MAKEFID	0x1000  /* 1 = data from makefid        */
 #define S_JEOL		0x2000  /* 1 = JEOL data		*/ 
 #define S_BRU		0x4000  /* 1 = Bruker data		*/ 
 
@@ -817,6 +818,9 @@ extern void movmem(void *c1, void *c2, size_t n , int sc1, int bytesperelem);
 
 /*************************************/
 extern void setfilepaths(int datano);
+/*************************************/
+/*************************************/
+extern int D_getLastVendorId();
 /*************************************/
 #endif
 

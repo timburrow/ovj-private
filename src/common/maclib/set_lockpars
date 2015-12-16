@@ -165,6 +165,11 @@ ELSEIF ($arg = 'initphase') THEN
     write('line3','Initial lock phase is %d',$optphase)
     sethw('lockphase',$optphase)
     readlk:$lvl
+    if (Console='mercury') then
+      $maxlockgain=39
+    else
+      $maxlockgain=48
+    endif
     if ($lvl<30) then
       readhw('lockphase'):$initphase
       readhw('lockpower'):$initpower
@@ -174,11 +179,6 @@ ELSEIF ($arg = 'initphase') THEN
       sethw('lock','off')
 
       //Temporarily increase lock power and gain
-      if (Console='mercury') then
-        $maxlockgain=39
-      else
-        $maxlockgain=48
-      endif
       sethw('lockgain',$maxlockgain)
       sethw('lockpower',48)
       shell('sleep 5'):$dum
@@ -297,6 +297,7 @@ ELSEIF (($arg='refinephaseup') or ($arg='refinephasedown'))THEN
 	$inc=$inc*$sign
 	$newphase=$now+$inc
 	if ($newphase>359) then $newphase=$newphase-359 endif
+	if ($newphase<0) then $newphase=$newphase+360 endif
 	sethw('lockphase',$newphase)
 	shell('sleep 2'):$dum
 	

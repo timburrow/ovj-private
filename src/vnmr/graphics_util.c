@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <stdio.h>
@@ -4376,6 +4376,7 @@ plot_header(char *fname, int x, int y, int w, int h) {
     char  *data, *key, *value;
     char  data1[64];
     int   r, c, y2, dock;
+    int maxrow = 1;
 
     if (fname == NULL || (strlen(fname) < 1)) {
         plot_std_header(x, y, w, h);
@@ -4396,9 +4397,6 @@ plot_header(char *fname, int x, int y, int w, int h) {
     ps_info_font();
     ps_light_color();
     y2 = headerY - ycharpixels * 0.5;
-    amove(headerX, y2);
-    rdraw(headerWidth, 0);
-    y2 = headerY - ycharpixels * 3.3;
     amove(headerX, y2);
     rdraw(headerWidth, 0);
 
@@ -4429,6 +4427,8 @@ plot_header(char *fname, int x, int y, int w, int h) {
             if (value == NULL)
                 continue;
             if (sscanf(value, "%d%d", &r, &c) == 2) {
+                if (r > maxrow)
+                   maxrow = r;
                 ps_info_light_font();
                 if ((data = fgets(inputs, 500, fd)) != NULL) {
                     while (*data == ' ' || *data == '\t')
@@ -4490,6 +4490,9 @@ plot_header(char *fname, int x, int y, int w, int h) {
             }
         }
     }
+    y2 = headerY - ycharpixels * (maxrow + 1.3);
+    amove(headerX, y2);
+    rdraw(headerWidth, 0);
 
     fclose(fd);
     return (1);

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* PR42_gha_caco_nhP.c
 
 Ref: (4,2)D Projection-Reconstruction Experiemnts for Protein Backbone

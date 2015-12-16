@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include "vnmrsys.h"
@@ -22,6 +22,7 @@
 #include "buttons.h"
 #include "pvars.h"
 #include "wjunk.h"
+#include "tools.h"
 #include "fdatap.h"
 extern float getParm( float fdata[], int parmCode, int origDimCode );
 
@@ -30,6 +31,7 @@ extern int Bnmr;
 extern int start_from_ft;
 extern int bufferscale;
 static float *data;
+static int jeolFlag;
 
 
 /* check to make sure value is a power of two */
@@ -48,6 +50,9 @@ static int checkFnSize( int fnSize, const char *msg )
          Werrprintf("%s data size (%d) is too large",msg,fnSize);
       return(-2);
    }
+   if (jeolFlag)
+      return(0);
+
    testFn = 16;
    while (testFn < fnSize)
       testFn *= 2;
@@ -286,6 +291,139 @@ static int setDataFile2D3D(int fn0, int f2realOnly, int fn1, int f1realOnly,
 }
 
 /**********************/
+static int setFidFile1D(int npval)
+/**********************/
+{ char path[MAXPATH];
+  dfilehead datahead;
+  dpointers block;
+  int r;
+
+  P_setreal(CURRENT,"arraydim",1.0,0);
+  P_setreal(PROCESSED,"arraydim",1.0,0);
+  P_setreal(CURRENT,"np",(double) npval,0);
+  P_setreal(PROCESSED,"np",(double) npval,0);
+
+  D_trash(D_DATAFILE);
+  D_trash(D_PHASFILE);
+  D_trash(D_USERFILE);
+
+  if ( (r = D_getfilepath(D_USERFILE, path, curexpdir)) )
+  {
+     D_error(r);
+     ABORT;
+  }
+
+  datahead.nblocks = 1;
+  datahead.ntraces = 1;
+  datahead.np      = npval;
+  datahead.vers_id = VERSION;
+  datahead.vers_id += FID_FILE;
+  datahead.vers_id |= S_JEOL;
+  datahead.nbheaders = 1;
+  datahead.ebytes  = 4;
+  datahead.tbytes  = datahead.ebytes * datahead.np;
+  datahead.bbytes  = datahead.tbytes * datahead.ntraces +
+                       sizeof(dblockhead);
+  datahead.status  = S_DATA|S_FLOAT|S_COMPLEX;
+
+  if ( (r=D_newhead(D_USERFILE,path,&datahead)) )
+    { D_error(r); ABORT;
+    }
+  if ( (r=D_allocbuf(D_USERFILE,0,&block)) )
+    { D_error(r); ABORT;
+    }
+
+  block.head->index  = 1;
+  block.head->scale  = 0;
+  block.head->status = datahead.status;
+  block.head->mode   = 0;
+  block.head->rpval  = 0;
+  block.head->lpval  = 0;
+  block.head->lvl    = 0;
+  block.head->tlt    = 0;
+  block.head->ctcount= 1;
+  data = block.data;
+
+  RETURN;
+}
+
+/**********************/
+static int getFidFile1D(int npval, int elem)
+/**********************/
+{ char path[MAXPATH];
+  dfilehead datahead;
+  dpointers block;
+  double rnp;
+  int e;
+
+  if ( (e=P_getreal(CURRENT,"np",&rnp,1)) )
+  {
+      P_err(e,"np",":");
+      ABORT;
+  }
+  if ( (int) rnp != npval)
+  {
+     Werrprintf("np mismatch currrent np is %d. New element np is %d", (int) rnp, npval);
+     ABORT;
+  }
+  D_trash(D_PHASFILE);
+
+  if ( (e = D_gethead(D_USERFILE, &datahead)) )
+  {
+     if ( (e = D_getfilepath(D_USERFILE, path, curexpdir)) )
+     {
+        D_error(e);
+        ABORT;
+     }
+
+     e = D_open(D_USERFILE, path, &datahead);     /* open the file */
+     if (e)
+     {
+        D_error(e);
+        ABORT;
+      }
+  }
+
+  if (npval != datahead.np)
+  {
+     if (elem == 1)
+        return(setFidFile1D(npval));
+     Werrprintf("data block np mismatch (%d)", npval);
+     ABORT;
+  }
+  if (elem > datahead.nblocks+1)
+  {
+     Werrprintf("Cannot add element %d to data block that only has %d elements",
+                 elem, datahead.nblocks);
+     ABORT;
+  }
+  if (elem > datahead.nblocks)
+  {
+     datahead.nblocks = elem;
+      D_updatehead(D_USERFILE, &datahead);
+     if ( (e=D_allocbuf(D_USERFILE,elem-1,&block)) )
+     { D_error(e); ABORT;
+     }
+  block.head->index  = elem;
+  block.head->scale  = 0;
+  block.head->status = datahead.status;
+  block.head->mode   = 0;
+  block.head->rpval  = 0;
+  block.head->lpval  = 0;
+  block.head->lvl    = 0;
+  block.head->tlt    = 0;
+  block.head->ctcount= 1;
+  }
+  else
+  {
+     D_getbuf(D_USERFILE, datahead.nblocks, elem-1, &block);
+  }
+  data = block.data;
+
+  RETURN;
+}
+
+/**********************/
 static int setDataFile1D(int fnval, int realOnly)
 /**********************/
 { char path[MAXPATH];
@@ -488,26 +626,48 @@ int pipeRead(int argc, char *argv[], int retc, char *retv[])
    float *ptr;
    float *start;
    float *dptr;
+   float multIm;
 
    if (argc<2)
    {
       Werrprintf("usage - %s('filename'<,index>)",argv[0]);
       ABORT;
    }
+   jeolFlag = (strcmp(argv[0],"jread")) ? 0 : 1;
    Wturnoff_buttons();
    D_allrelease();
    if (argv[1][0] == '/')
       strcpy(path,argv[1]);
    else
       sprintf(path,"%s/%s",curexpdir,argv[1]);
+   elem = 1;
+   multIm = FTNORM;
    if (argc >= 3)
    {
-      elem = atoi(argv[2]);
-      if (elem < 1)
-         elem = 1;
+      if (isReal(argv[2]))
+      {
+         elem = atoi(argv[2]);
+         if (elem < 1)
+            elem = 1;
+      }
+      else if ( ! strcmp(argv[2],"rev") )
+      {
+         multIm = -FTNORM;
+      }
+      if (argc >= 4)
+      {
+         if (isReal(argv[3]))
+         {
+            elem = atoi(argv[3]);
+            if (elem < 1)
+               elem = 1;
+         }
+         else if ( ! strcmp(argv[3],"rev") )
+         {
+            multIm = -FTNORM;
+         }
+      }
    }
-   else
-      elem = 1;
 
    if ( access(path,R_OK) )
    {
@@ -541,15 +701,31 @@ int pipeRead(int argc, char *argv[], int retc, char *retv[])
       }
       if ( ! realOnly )  /* Complex counts complex pairs */
         xSize *= 2;
-      if ( (argc != 3) && setDataFile1D(xSize,realOnly))
+      if (jeolFlag)
       {
-         close(fd);
-         ABORT;
+         if ( (elem == 1) && setFidFile1D(xSize))
+         {
+            close(fd);
+            ABORT;
+         }
+         if ( (elem != 1)  && getFidFile1D(xSize,elem))
+         {
+            close(fd);
+            ABORT;
+         }
       }
-      if ( (argc == 3)  && getDataFile1D(xSize,realOnly,elem))
+      else
       {
-         close(fd);
-         ABORT;
+         if ( (argc != 3) && setDataFile1D(xSize,realOnly))
+         {
+            close(fd);
+            ABORT;
+         }
+         if ( (argc == 3)  && getDataFile1D(xSize,realOnly,elem))
+         {
+            close(fd);
+            ABORT;
+         }
       }
       start = (float *) mmap(0,sizeof(float) * (xSize+FDATASIZE), PROT_READ,
                              MAP_PRIVATE, fd, 0);
@@ -569,27 +745,47 @@ int pipeRead(int argc, char *argv[], int retc, char *retv[])
          while ( num-- )
          {
             *dptr++ = *ptr * FTNORM;
-            *dptr++ = *(ptr+xSize/2) * FTNORM;
+            *dptr++ = *(ptr+xSize/2) * multIm;
              ptr++;
          }
       }
       munmap(start, sizeof(float) * (xSize+FDATASIZE) );
       close(fd);
 
-      if ( (r=D_markupdated(D_DATAFILE,elem-1)) )
-      { D_error(r);
-        ABORT;
-      }
-      if ( (r=D_release(D_DATAFILE,elem-1)) )
-      { D_error(r);
-        ABORT;
-      }
-      if (!Bnmr)
+      if (jeolFlag)
       {
-         releasevarlist();
-         appendvarlist("cr");
-         Wsetgraphicsdisplay("ds");		/* activate the ds program */
-         start_from_ft = 1;
+         if ( (r=D_markupdated(D_USERFILE,elem-1)) )
+         { D_error(r);
+           ABORT;
+         }
+         if ( (r=D_flush(D_USERFILE)) )
+         { D_error(r);
+           ABORT;
+         }
+         if ( (r=D_release(D_USERFILE,elem-1)) )
+         { D_error(r);
+           ABORT;
+         }
+         D_close(D_USERFILE);
+         Wsetgraphicsdisplay("");		/* activate the ds program */
+      }
+      else
+      {
+         if ( (r=D_markupdated(D_DATAFILE,elem-1)) )
+         { D_error(r);
+           ABORT;
+         }
+         if ( (r=D_release(D_DATAFILE,elem-1)) )
+         { D_error(r);
+           ABORT;
+         }
+         if (!Bnmr)
+         {
+            releasevarlist();
+            appendvarlist("cr");
+            Wsetgraphicsdisplay("ds");		/* activate the ds program */
+            start_from_ft = 1;
+         }
       }
       RETURN;
    }

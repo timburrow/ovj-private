@@ -79,9 +79,9 @@ ENDIF
 "*********************************************************************"
 IF ($arg = 'init') THEN
 	"Reset parameters to do scout experiment"
-  on('gain'):$gainon
-  if (Console='mercury') then gain=4 else gain=24 endif
-  if ($gainon<1) then gain='n' endif
+//  on('gain'):$gainon
+//  if (Console='mercury') then gain=4 else gain=24 endif
+//  if ($gainon<1) then gain='n' endif
   writeparam($tmpfile,'nt pw d1 composit MinSW pltopt gain werr')
   writeparam($tmpfile,'execprocess execplot execprep execprescan execsetup','current','add')
   CPwtmenu('acq','save')
@@ -93,9 +93,7 @@ IF ($arg = 'init') THEN
       spin=0
   endif
   d1=1 nt=1 pw=1 
-  if (Console='mercury') then gain=0 else gain=10 endif
   ss=0 pltopt='n'
-//  seqfil='wet1D' wet='n'
   wet='n'
   MinSW='off'
   strtpar=''

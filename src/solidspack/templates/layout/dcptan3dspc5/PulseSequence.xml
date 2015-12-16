@@ -328,10 +328,10 @@
         />
       <entry loc="180 40" size="60 20"
         style="PlainText"
-        vq="aYyx"
-        vc="aYyx = $VALUE"
-        set="$VALUE = aYyx"
-        show="on('aYyx'):$VALUE"
+        vq="aXyx"
+        vc="aXyx = $VALUE"
+        set="$VALUE = aXyx"
+        show="on('aXyx'):$VALUE"
         digits="0"
         />
       <label loc="130 60" size="50 20"

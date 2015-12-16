@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /*-----------------------------------------------------------------------
@@ -267,6 +267,8 @@ int substr(int argc, char *argv[], int retc, char *retv[])
     else if ((argc == 4) && (strcmp(argv[2],"dirname")==0))
        mode = 3;
     else if ((argc == 4) && (strcmp(argv[2],"squeeze")==0))
+       mode = 3;
+    else if (((argc == 3) || (argc == 4)) && (strcmp(argv[2],"trim")==0))
        mode = 3;
     if (mode == 4)
     {
@@ -908,6 +910,54 @@ int substr(int argc, char *argv[], int retc, char *retv[])
                retv[0] = newString(  squeezed );
             else
                Winfoprintf("squeezed:  %s",squeezed);
+        }
+        else if (! strcmp(argv[2],"trim"))
+        {
+            char trimmed[MAXSTR*4];
+            char delimiter[8] = " \t";
+            int i=0;
+            int j=0;
+            int k;
+            int trimit;
+            int didOne = 0;
+            char ch;
+            int len;
+            char *dels;
+
+           
+            if (argc == 3)
+               dels = delimiter;
+            else
+               dels = argv[3];
+            len = strlen(dels);
+            while ( (ch = argv[1][i]) != '\0')
+            {
+               if (j < MAXSTR*4 - 1)
+               {
+                  if ( ! didOne )
+                  {
+                     trimit = 0;
+                     for (k=0; k<len; k++)
+                        if (ch == dels[k])
+                           trimit = 1;
+                     if ( ! trimit)
+                     {
+                        trimmed[j++] = ch;
+                        didOne = 1;
+                     }
+                  }
+                  else
+                  {
+                     trimmed[j++] = ch;
+                  }
+               }
+               i++;
+            }
+            trimmed[j] = '\0';
+            if (retc)
+               retv[0] = newString(  trimmed );
+            else
+               Winfoprintf("trimed:  %s",trimmed);
         }
         else
         {   Werrprintf("substr: bad word index!");

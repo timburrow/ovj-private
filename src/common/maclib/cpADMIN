@@ -252,6 +252,7 @@ write('file',$plfmtfile,'"tif" "tif"')
 write('file',$plfmtfile,'"pdf" "pdf"')
 write('file',$plfmtfile,'"pcx" "pcx"')
 write('file',$plfmtfile,'"jpg" "jpg"')
+write('file',$plfmtfile,'"postscript" "postscript"')
 
 if (traymax > 1) and (traymax <> 96) and (traymax<>768) then
   $reffile=$admindir+'/refsample'

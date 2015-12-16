@@ -29,7 +29,7 @@ numberFormat = #,##0.00
 # defines the gif used on the bills. You can (and should) put you own logo 
 # here 
 #
-logo = agilentlogo.png
+logo = vnmrjNameBW.png
 #
 #
 # The header of the rate table can be set with these four string, they must

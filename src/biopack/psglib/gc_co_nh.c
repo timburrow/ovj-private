@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /*  gc_co_nh.c               
 
     3D C(CO)NH (or CCH-TOCSY-NNH) gradient sensitivity enhanced version.

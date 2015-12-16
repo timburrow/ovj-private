@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 /*
 *                                                                       
@@ -12,7 +12,6 @@
    MODIFIED by CG to move out struct xv_ops from struct SVCXPRT
 */
 
-/* Copyright (c) Varian Assoc., Inc.  All Rights Reserved. */
 
 /*
  * svc.h, Server-side remote procedure call interface.

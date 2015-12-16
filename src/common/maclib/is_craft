@@ -24,10 +24,11 @@ if not $ok or $1='setup' then
 endif
 
 // default is version 1
-    $rev='Craft Version 1'
-    exists(systemdir+'/craft/craftrev','file'):$fex
+    $rev='Craft Version 1' $crf=''
+//    exists(systemdir+'/craft/craftrev','file'):$fex
+    exists('craftrev',''):$fex,$crf
     if $fex then
-    	lookup('mfile',systemdir+'/craft/craftrev','readline',1):$rev
+    	lookup('mfile',$crf,'readline',1):$rev
     endif
     strstr($rev,'Craft Version'):$ok
     if not $ok then $rev='Craft Version 1' endif
@@ -41,4 +42,9 @@ endif
 $ret=0 $ret2=0
 substr(craftrev,3):$ret
 substr($rev,3):$ret2
+getbinpath('Craft'):$ret3
+if not $ret3 then
+   if $ret2>2 then $re2=2 endif
+   if $ret>2 then $ret=2 endif
+endif
 return($ret,$ret2)

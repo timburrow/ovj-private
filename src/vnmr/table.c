@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /*------------------------------------------------------------------------------
@@ -305,6 +305,7 @@ extern int setpage();
 extern int iplot();
 extern int jplot();
 extern int large();
+extern int leftshiftfid(int argc, char *argv[], int retc, char *retv[]);
 extern int length();
 extern int ll2d();
 extern int ln();
@@ -832,6 +833,7 @@ static cmd_t vnmr_table[] = {
         {"isFDAsystem", isFDAsystem,    NO_REEXEC, 0},
         {"isRecUpdated",isRecUpdated,   NO_REEXEC, 0},
 	{"jexp"       , jexp,		NO_REEXEC, 0},
+	{"jread"      , pipeRead,	NO_REEXEC, 0},
 	{"downsizefid"       , downsizefid,		NO_REEXEC, 0},
 	{"replacetraces"       , replacetraces,		NO_REEXEC, 0},
 #ifdef VNMRJ
@@ -859,6 +861,7 @@ static cmd_t vnmr_table[] = {
 	{"lookup"     , lookup,		NO_REEXEC, 10},
 	{"lp"         , lpcmd,		NO_REEXEC, 0},
 	{"ls"         , shellcmds,	NO_REEXEC, 0},
+	{"lsfid"      , leftshiftfid,	NO_REEXEC, 0},
 	{"macrocat"   , macroCat,	NO_REEXEC, 0},
 	{"macrocp"    , macroCp,	NO_REEXEC, 0},
 	{"macrodir"   , macroDir,	NO_REEXEC, 0},

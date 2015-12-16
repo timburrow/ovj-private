@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /***********************************************************************/
@@ -99,11 +99,31 @@ int ddf(int argc, char *argv[], int retc, char *retv[])
   dblockhead    *tmpbhead;
   char outfidpath[MAXPATH], dataname[10];
   int f;
-  int btype = 0;
+  int btype = 0; /* This flags that a vers_id is requested */
+  int jtype = 0; /* This asks if vers_id is S_JEOL */
+  int itype = 0; /* This asks for vers_id */
 
   if ((argc >= 2) && ! strcmp(argv[1],"B") )
   {
     btype=1;
+    if (argc == 3)
+    {
+      strcpy(outfidpath, argv[2]);
+      btype = 2;     
+    }
+  }
+  else if ((argc >= 2) && ! strcmp(argv[1],"J") )
+  {
+    jtype = btype=1;
+    if (argc == 3)
+    {
+      strcpy(outfidpath, argv[2]);
+      btype = 2;     
+    }
+  }
+  else if ((argc >= 2) && ! strcmp(argv[1],"vers_id") )
+  {
+    itype = btype=1;
     if (argc == 3)
     {
       strcpy(outfidpath, argv[2]);
@@ -177,7 +197,14 @@ int ddf(int argc, char *argv[], int retc, char *retv[])
   if (btype)                 /* return if S_BRU bit is set  */
   {
      if (retc)
-       retv[0] = intString( (dhd.vers_id & S_BRU) ? 1 : 0 );
+     {
+         if (itype)
+            retv[0] = intString( dhd.vers_id );
+         else if (jtype)
+            retv[0] = intString( (dhd.vers_id & S_JEOL) ? 1 : 0 );
+         else
+            retv[0] = intString( (dhd.vers_id & S_BRU) ? 1 : 0 );
+     }
      D_close(D_USERFILE);
      return COMPLETE;
   }
@@ -1668,6 +1695,8 @@ int makefid(int argc, char *argv[], int retc, char *retv[])
                 fid_fhead.tbytes  = np_makefid * fid_fhead.ebytes;
                 fid_fhead.bbytes  = fid_fhead.tbytes + sizeof( struct datablockhead );
                 fid_fhead.status  = (S_DATA | S_COMPLEX | S_DDR);
+                fid_fhead.vers_id &= ~P_VENDOR_ID;
+                fid_fhead.vers_id |= S_MAKEFID;
 
                 if (new_fid_format == REAL_NUMBERS)
                   fid_fhead.status |= S_FLOAT;

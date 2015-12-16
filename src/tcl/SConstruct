@@ -1,4 +1,11 @@
-SConscript('SConstruct.vnmrwish')
+#
+
+import sys
+
+platform = sys.platform
+
+if ( 'darwin' not in platform):
+    SConscript('SConstruct.vnmrwish')
 # SConscript('SConstruct.gilson')
 # SConscript('SConstruct.spincad')
 SConscript('SConstruct.bin')

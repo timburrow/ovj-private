@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2015  Stanford University
- *
- * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
- *
- * For more information, see the README file.
- */
+// Copyright (C) 2015  University of Oregon
+// You may distribute under the terms of either the GNU General Public
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 package accounting;
 
 import java.io.*;
@@ -127,7 +123,7 @@ public class AProps extends Properties {
       // See if the logo file exists, if not, use a default
       File file = new File(fln);
       if (!file.exists()) {
-          fln = new String(getRootDir()+"/adm/accounting/agilentTrans200.png");
+          fln = new String(getRootDir()+"/adm/accounting/vnmrjNameBW.png");
       }
       logo = new ImageIcon( fln );
 

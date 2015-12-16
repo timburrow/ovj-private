@@ -1,7 +1,7 @@
-// Copyright (C) 2015  Stanford University
+// Copyright (C) 2015  University of Oregon
 // You may distribute under the terms of either the GNU General Public
-// License or the Apache License, as specified in the README file.
-// For more information, see the README file.
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 /*  gmqcosyHT.c - Hadamard DQ-COSY, Eriks Kupce, Oxford, 12.03.07  
                   based on gmqcosy.c 
 

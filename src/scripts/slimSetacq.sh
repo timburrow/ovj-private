@@ -1,23 +1,23 @@
 : '@(#)slimSetacq.sh 22.1 03/24/08 1999-2002 '
 # 
 #
-# Copyright (C) 2015  Stanford University
+# Copyright (C) 2015  University of Oregon
 # 
 # You may distribute under the terms of either the GNU General Public
-# License or the Apache License, as specified in the README file.
+# License or the Apache License, as specified in the LICENSE file.
 # 
-# For more information, see the README file.
+# For more information, see the LICENSE file.
 # 
 #
 : '@(#)rsetacq.sh 16.1 10/25/2 1991-1997 '
 # 
 #
-# Copyright (C) 2015  Stanford University
+# Copyright (C) 2015  University of Oregon
 # 
 # You may distribute under the terms of either the GNU General Public
-# License or the Apache License, as specified in the README file.
+# License or the Apache License, as specified in the LICENSE file.
 # 
-# For more information, see the README file.
+# For more information, see the LICENSE file.
 # 
 #
 : /bin/sh

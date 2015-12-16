@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #---------------------------------------------------------------
-#Usage:  vnmremail <-m> "filename" address
+#Usage:  vnmremail <-m> <"-s subject"> "filename" address
 #  without -m option the file specified by filename
 #  is sent after uuencode.  A directory will be 
 #  zipped.
@@ -29,11 +29,17 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
+subject=''
 catfile=uuencode
 if [ `$echo $1 | awk '{print $1}'` = "-m" ]; then
    catfile=cat
    shift
 fi
+if [ `$echo $1 | awk '{print $1}'` = "-s" ]; then
+   subject=`$echo $1 | awk '{print $2}'`
+   shift
+fi
+
 Files=$1
 eaddress=$2
 
@@ -67,7 +73,13 @@ fi
 rm -rf $tmp1
 rm -rf $tmp2
 
-systemname=`uname -n`
+Uname=`uname -n`
+if [ "x$subject" = "x" ]; then
+    systemname=$Uname
+else
+    systemname="$Uname ($subject)"
+fi
+
 tmpfiles=""
 mailarg=""
 

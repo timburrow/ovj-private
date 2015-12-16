@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* gNfhsqc_CCLS.c    "Fast CCLS N15 hsqc using 3919 watergate suppression"
 
    CCLS: Carbonyl Carbon Label Selective

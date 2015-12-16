@@ -120,7 +120,8 @@ IF ($auto) THEN
 	exists(autodir+'/enterQ.macdir/DATE_runstart','file'):$filex
 	if $filex then
 	    $startday='' $startdate=''
-	    lookup('mfile',autodir+'/enterQ.macdir/DATE_runstart','read'):$startdate
+	    shell('(cat '+autodir+'/enterQ.macdir/DATE_runstart | tail -n 1)'):$startdate
+//	    lookup('mfile',autodir+'/enterQ.macdir/DATE_runstart','read'):$startdate
 	    strstr($startdate,'_'):$ret,$startdate
 	    shell('(date -d '+$startdate+' +%a)'):$startday
 	    $7days='Mon','Tue','Wed','Thu','Fri','Sat','Sun'

@@ -94,7 +94,7 @@ if (emailflag='n') then
 endif
 $system=''
 shell('uname -n'):$system
-$subject='"message from '+$system+'"'
+$subject=''
 $date=''
 shell('date "+%a %b %e %H:%M"'):$date
 
@@ -121,6 +121,8 @@ ELSEIF (auto <> 'y') THEN
 ELSE 
 	$sampleinfo=autodir+'/enterQ.macdir/currentsampleinfo'
 	$currentQ=autodir+'/enterQ.macdir/currentQ'
+	exists($sampleinfo,'file'):$fex
+	if $fex then lookup('mfile',$sampleinfo,'seekcs','SampleDir:','read',1):$subject endif
 ENDIF
     
 IF ($1 = 'start') THEN
@@ -241,12 +243,13 @@ if ($keyword) and (auto='y') then
 	endif
     endif
 endif
+substr($subject,1):$subject
 
    if ($adminaddr<>'') then
-	vnmremail('-m',$etmp,$adminaddr)
+	vnmremail('-m','-s '+$subject,$etmp,$adminaddr)
    endif
    if ($eaddr<>'') then
-   	vnmremail('-m',$etmp,$eaddr)
+   	vnmremail('-m','-s '+$subject,$etmp,$eaddr)
    endif
    if (auto <> 'y') and ($keyword) then
 	shell('rm -rf '+$sampleinfo):$dum

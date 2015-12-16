@@ -2,17 +2,21 @@
 // Chempacker macro
 
 if $# > 0 then $file=$1 else $file=file endif
-
+    $e='' $fidex=0
     substr($file,'dirname'):$d,$b,$e
-    $file=$d+'/'+$b+'.REC'
-    exists($file+'/procpar','file'):$fidex
-    if not $fidex then
-        $file=$d+'/'+$b+'.rec'
-        exists($file+'/procpar','file'):$fidex
-    endif
-    if not $fidex then
-        $file=$d+'/'+$b+'.fid'
-        exists($file+'/procpar','file'):$fidex
+    if $e='' then
+    	$file=$d+'/'+$b+'.REC'
+    	exists($file+'/procpar','file'):$fidex
+    	if not $fidex then
+            $file=$d+'/'+$b+'.rec'
+            exists($file+'/procpar','file'):$fidex
+    	endif
+    	if not $fidex then
+            $file=$d+'/'+$b+'.fid'
+            exists($file+'/procpar','file'):$fidex
+    	endif
+    else
+	exists($file+'/procpar','file'):$fidex
     endif
     if not $fidex then return(0) endif
     exists($file+'/sampling.sch','file'):$schex

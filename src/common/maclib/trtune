@@ -63,6 +63,7 @@ if $action = 'setup' then
     hfmode=$hfmode
   endif
 
+  full
   in='n' 
   spin = 'n'
   ss = 0
@@ -245,11 +246,11 @@ if ($action = 'process') then
 
   write('graphics','spectrum',wcmax-80,10,'%s',tn)
   pen('graphics','scale')
-  move(sc+wc/2,0)
-  draw(sc+wc/2,wc2max-10)
+  move(wcmax-sc-wc/2,0)
+  draw(wcmax-sc-wc/2,wc2max-10)
   pen('graphics','cyan')
-  move(10,vp)
-  draw(sc+wc-10,vp)
+  move(wcmax-sc-10,vp)
+  draw(wcmax-sc-wc+10,vp)
 
   if (nf < 2) then
     jFunc(62,1)

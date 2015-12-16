@@ -13,6 +13,8 @@
 *             interferogram                                          *
 *  lsfrq2  -  frequency shift of the "fn2" spectrum in Hz            *
 *								     *
+*  lsfid(points<,datapath>) - command to shift an FID                *
+*								     *
 **********************************************************************
 
 All six of these parameters are in the processing group.  phfid, lsfid,
@@ -59,9 +61,32 @@ field (to the left).  These 3 parameters store the value of the frequency
 shift in Hz.
 
 
+******************************************************************************
+ 
+The lsfid command will either left-shift (points>0) or right-shift (points<0)
+an FID.  A right shift adds zeros to the front of the FID. The points argument
+in the number of complex points (real and imaginary) to shift.
 
-Related Manual Entries:		dfid		(command)
-				ds		(command)
-				(w)ft		(command)
-				(w)ft2d		(command)
-				(w)ft1d		(command)
+An optional second argument specifies the filename of an FID file.
+If there is no second argument, lsfid will shift the FID
+in the current experiment.
+
+If an optional second argument is given and if there is a procpar in the
+same directory, the "np" and "at" parameters in that procpar will be updated.
+Also, the "lsfid" parameter in that procpar will be set to "Not used".
+
+If no second argument is given, the "current" and "processed" values
+of "np" and "at" parameters will be updated. The "lsfid" parameter
+will be set to "Not used".
+
+If no second argument is given, this command will overwrite acqfil/fid
+and acqfil/procpar in curexp.  If acqfil/fid is linked to a saved fid file,
+the link will be replaced by a copy, so the original fid will not be overwritten.
+ 
+This command can be repeated to further shift the fid.
+
+Examples:
+
+ lsfid(2)   // left-shift FID in current experiment by 2 complex data points.
+ lsfid(-3,userdir+'/data/myfid.fid/fid') // right-shift FID in saved data set
+

@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <unistd.h>
@@ -1028,8 +1028,13 @@ int p11_action(int argc, char *argv[], int retc, char *retv[])
     char str[MAXSTR];
     extern int     start_from_ft;   /* set by ft if ds is to be executed */
 
-    (void) retc;
-    (void) retv;
+    if ( (argc == 2) && ! strcmp(argv[1],"showDataID") )
+    {
+       if (retc > 0)
+          retv[0]= (char *)realString((double)showDataID);
+       else
+          Winfoprintf("showDataID= %d",showDataID); 
+    }
     if(argc < 3) RETURN;
     if(!part11System) RETURN;
 
@@ -1370,6 +1375,12 @@ int readPart11Config()
 
     sprintf(sysOwnedSafecp, "%s%s", part11RootPath, "bin/safecp");
     sprintf(usrOwnedSafecp, "%s%s", systemdir, "/bin/safecp");
+
+    sprintf(path, "%s%s", part11RootPath, "dataID_off");
+    if ( ! access(path,F_OK) )
+       showDataID = 0;
+    else
+       showDataID = 1;
 
     sprintf(path, "%s%s", part11RootPath, "part11Config");
 

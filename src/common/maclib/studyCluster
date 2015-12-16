@@ -822,6 +822,36 @@ ELSEIF ($1='makearray') or ($1='makesum') THEN
     endif
     exists($cfids+'_orig','file'):$origex
 
+    $i=1 $error=0
+    repeat
+	$fidname=$s1[$i]
+        $firstchar='' substr($fidname,1,1):$firstchar
+        if $firstchar<>'/' then $fidname=userdir+'/data/'+$fidname endif
+        $dname='' $bname='' $ext=''
+        substr($fidname,'dirname'):$dname,$bname,$ext
+	$fidname=$dname+'/'+$bname
+        if ($ext='') then
+            $ext='REC'
+            exists($fidname+'.'+$ext+'/acqfil/fid','file'):$direx
+            if not $direx then
+                $ext='rec'
+                exists($fidname+'.'+$ext+'/acqfil/fid','file'):$direx
+            endif
+            if not $direx then
+                $ext='fid'
+            endif
+        endif
+        if $ext='REC' or $ext='rec' then
+            $fid=$fidname+'.'+$ext+'/acqfil/fid'
+        else
+            $fid=$fidname+'.'+$ext+'/fid'
+        endif
+        readheader($fid):$nt,$fdim
+        if $fdim>1 then $error=1 $i=$total endif
+        $i=$i+1
+    until $i > $total
+    if $error then return endif
+
     sort($s2,'u'):$index,$s3
     $s3size=size('$s3')
     if ($s3size<>1) or ($s3='') then
@@ -840,6 +870,7 @@ ELSEIF ($1='makearray') or ($1='makesum') THEN
                     {$0}('makeonlyspecarray',$cfids):$retval2
 		endif
 		if $origex then rename($cfids+'_orig',$cfids):$dum endif
+		if $retval2='' then return(0,$retval2) endif
     		if ($# < 3) then $3='' endif
     		if $3<>'noxml' then
     		    studyCluster('setqueue',$2+'/dirinfo/xmldir')
@@ -851,6 +882,7 @@ ELSEIF ($1='makearray') or ($1='makesum') THEN
 	if $retval2<>'' then $retval1=1 endif
 	return($retval1,$retval2)
     endif
+
     jexp:$cexp
     tmpsqcopy($0)
     $rp=0

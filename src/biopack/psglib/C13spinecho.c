@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 #ifndef LINT
-static char SCCSid[] = "@(#)s2pul.c 18.1 06/25/04 Copyright (c) 1991-1996 Agilent Technologies All Rights Reserved";
 #endif
 
 /*  C13spinecho   */

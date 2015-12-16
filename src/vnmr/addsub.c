@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /************************************************************************/
@@ -80,7 +80,7 @@ static int addsub_pars(char [], int);
 |	      open_file()/3		|
 |					|
 +--------------------------------------*/
-static int open_file(int np, char *filepath, int stat)
+static int open_file(int np, char *filepath, int stat, int vendor)
 {
   int	r;
 
@@ -92,6 +92,8 @@ static int open_file(int np, char *filepath, int stat)
   datahead.ebytes = 4;
   datahead.tbytes = datahead.ebytes * datahead.np;
   datahead.bbytes = datahead.tbytes + sizeof(dblockhead);
+  datahead.vers_id &= ~P_VENDOR_ID;
+  datahead.vers_id |= vendor;
 
   if ( (r = D_newhead(D_USERFILE, filepath, &datahead)) )
   {
@@ -187,6 +189,7 @@ static int get_addsub_data(int newexp, dpointers *new_file, char *exppath,
 
   if (newexp)
   {
+     int vendor_id = 0;
      dpointers	dummy;
 
 /**************************************************
@@ -194,7 +197,7 @@ static int get_addsub_data(int newexp, dpointers *new_file, char *exppath,
 **************************************************/
 
      trace = 0;
-     open_file(fn/2, path, (S_DATA|S_FLOAT|S_NP|status1));
+     open_file(fn/2, path, (S_DATA|S_FLOAT|S_NP|status1),vendor_id);
      add_new_file(&dummy, trace, (S_DATA|S_FLOAT|status1), mode1);
      D_release(D_USERFILE, trace);
      D_close(D_USERFILE);
@@ -212,7 +215,11 @@ static int get_addsub_data(int newexp, dpointers *new_file, char *exppath,
      vms_fname_cat(path, (fid) ? "[.acqfil]fid" : "[.datdir]data");
 #endif 
 
-     open_file(fn, path, (S_DATA|S_FLOAT|S_NP|status2));
+     if (fid)
+     {
+        vendor_id = D_getLastVendorId();
+     }
+     open_file(fn, path, (S_DATA|S_FLOAT|S_NP|status2),vendor_id);
      if (fid)
      {
          add_new_file(new_file, trace, (S_DATA|S_FLOAT|status2), 0);

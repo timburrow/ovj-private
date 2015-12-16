@@ -117,7 +117,7 @@ IF ($0<>'walkupQ_mimic') THEN
    	shell('chmod a+rw '+userdir+'/persistence/.talk2j'):$dum
    endif
 
-   if ($resume='') then
+   if ($resume='') and calibmod='no' then
 //   if ($resume<>'addq') and ($resume<>'resumeq') then
      setadirtmplt
      setsvftmplt

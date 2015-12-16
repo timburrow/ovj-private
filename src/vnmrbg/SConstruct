@@ -64,7 +64,14 @@ elif (gplsource=="true"):
                     'vnmr_gxyzcalib.c',
                      ]
 else:
-    cOptFileList = ['vnmr_nr.o',
+    if (platform=="darwin"):
+        cOptFileList = ['macos/vnmr_nr.o',
+                    'macos/vnmr_dosyfit_nr.o',
+                    'macos/vnmr_gradfit_nr.o',
+                    'macos/vnmr_gxyzcalib_nr.o',
+                     ]
+    else:
+        cOptFileList = ['vnmr_nr.o',
                     'vnmr_dosyfit_nr.o',
                     'vnmr_gradfit_nr.o',
                     'vnmr_gxyzcalib_nr.o',
@@ -466,7 +473,11 @@ elif (gplsource=="true"):
     cplusplusOptFileList = [
                      ]
 else:
-    cplusplusOptFileList = ['vnmr_aipSpline_nr.o',
+    if (platform=="darwin"):
+        cplusplusOptFileList = ['macos/vnmr_aipSpline_nr.o',
+                     ]
+    else:
+        cplusplusOptFileList = ['vnmr_aipSpline_nr.o',
                      ]
 
 vnmrBgCCFileList = ['graphics3D.C']

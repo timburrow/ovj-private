@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* PR42_gChmqcnoesyNhsqcA.c
 
  This methyl-NH NOESY sequence is only suitable for 2H/13C/15N, ILV-methyl labeled samples.

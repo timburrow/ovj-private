@@ -60,7 +60,7 @@
         style="PlainText"
         vq="plotlogo"
         vc="plotlogo='$VALUE'"
-        set="if plotlogo='' then $VALUE='/vnmr/iconlib/agilentlogo.png' else $VALUE=plotlogo endif"
+        set="if plotlogo='' then $VALUE='/vnmr/iconlib/plotLogo.gif' else $VALUE=plotlogo endif"
         />
     </filebrowser>
     <label loc="10 10" size="200 25"
