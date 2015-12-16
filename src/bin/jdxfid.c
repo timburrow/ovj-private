@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 /* jdxfid - write JCAMP-DX format ASCII files from VNMR FID */
 
@@ -375,7 +375,7 @@ int main (argc, argv)
   int min_arg = 1;
   int type_opt = 0;
   int i, ok, trace = 1;
-  char *fidname, outname_r[256], outname_i[256], arch[64];
+  char *fidname, outname_r[256], outname_i[256];
   struct utsname *s_uname;
 
 
@@ -609,15 +609,15 @@ int main (argc, argv)
 
   if (debug)
   {
-    (void) printf("fheader.nblocks       = %ld\n", fheader.nblocks);
-    (void) printf("fheader.ntraces       = %ld\n", fheader.ntraces);
-    (void) printf("fheader.np            = %ld\n", fheader.np);
-    (void) printf("fheader.ebytes        = %ld\n", fheader.ebytes);
-    (void) printf("fheader.tbytes        = %ld\n", fheader.tbytes);
-    (void) printf("fheader.bbytes        = %ld\n", fheader.bbytes);
+    (void) printf("fheader.nblocks       = %d\n", fheader.nblocks);
+    (void) printf("fheader.ntraces       = %d\n", fheader.ntraces);
+    (void) printf("fheader.np            = %d\n", fheader.np);
+    (void) printf("fheader.ebytes        = %d\n", fheader.ebytes);
+    (void) printf("fheader.tbytes        = %d\n", fheader.tbytes);
+    (void) printf("fheader.bbytes        = %d\n", fheader.bbytes);
     (void) printf("fheader.vers_id       = %d\n", fheader.vers_id);
     (void) printf("fheader.status        = %04x\n", fheader.status);
-    (void) printf("fheader.nblockheaders = %ld\n", fheader.nblockheaders);
+    (void) printf("fheader.nblockheaders = %d\n", fheader.nblockheaders);
   }
 
   /* try to open temporary file */
@@ -659,6 +659,7 @@ int main (argc, argv)
 
   if ((fheader.status & 0x8) != 0)	/* float FID (dsp=i) */
   {
+    double maxmax;
     ffid = (struct floatpair *) malloc(fheader.np * fheader.ebytes);
     (void) fread(ffid, fheader.np * fheader.ebytes, 1, fid);
     (void) fclose(fid);
@@ -682,6 +683,15 @@ int main (argc, argv)
     else
       factor = rfactor;
     if (factor < 1.0) factor = 1.0;
+    maxmax = rmax;
+    if (imax > maxmax) maxmax = imax;
+    if (-rmin > maxmax) maxmax = -rmin;
+    if (-imin > maxmax) maxmax = -imin;
+    
+    rfactor = 1.0;
+    while ( (rfactor < 1e4) && ( maxmax*rfactor < 1e8) )
+        rfactor *= 10.0;
+    factor = 1 / rfactor;
     rfirst = (int) ((double) ffid[0].p1 / factor);
     rlast  = (int) ((double) ffid[fheader.np/2 - 1].p1 / factor);
     ifirst = (int) ((double) ffid[0].p2 / factor);

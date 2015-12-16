@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /*  ghn_Jnca_2DS3.c
 
 This pulse sequence records 1J(NCa), 2J(NCa), 2J(HNCa) and 3J(HNCa) couplings in a 1H-15N 

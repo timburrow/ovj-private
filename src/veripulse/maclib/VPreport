@@ -1,4 +1,5 @@
 "macro VPreport"
+"macro VPreport"
 "Options"
 "pass a specific ID to compile a report using"
 "or keyword all to compile all results"
@@ -177,8 +178,192 @@ ELSEIF ($function='update') THEN
       return
    endif
 
+   //Write header 
+      write('reset',$reportfile_html)
+      write('file',$reportfile_html,'<!DOCTYPE html>')
+      write('file',$reportfile_html,'<html>')
+      write('file',$reportfile_html,'<head>')
+      write('file',$reportfile_html,'<title>Agilent VeriPulse Summary Report</title>')
+      write('file',$reportfile_html,'<meta charset="utf-8">')
+      write('file',$reportfile_html,'<link rel="stylesheet" type="text/css" href="veriPulse.css"/>')
+      write('file',$reportfile_html,'</head>')
+      write('file',$reportfile_html,'<body>')
+      write('file',$reportfile_html,'<img src="img/agi_logo.png"/>')
+      write('file',$reportfile_html,'<div class="container">')
+      write('file',$reportfile_html,'<div class="header-table">')
+      write('file',$reportfile_html,'<h3 style="margin: 20 px">VeriPulse Summary Report</h3>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Customer Name</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td>%s</td>','XXXCUSTOMERXXX')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>System Name</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td>%s</td>',IPsysname)
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Test Operator</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td>%s</td>',IPoperator)
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Probe Name</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td>%s</td>','XXXPROBEXXX')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Test Start Time</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td>%s</td>',$starttime)
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Data Storage Directory</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+
+      //if ($runid='all') then
+      shell('dirname '+adirtmplt):$dir
+      $dir2='' $dir3='' $maxlength=40
+      length($dir):$dirlength
+      if ($dirlength>$maxlength) then
+            $numlines=trunc($dirlength/$maxlength+0.5)
+	    $m=1
+            repeat
+	       $dir1=''
+	       substr($dir,$m,$m+$maxlength):$dir1
+               write('file',$reportfile_html,'<tr>')
+               write('file',$reportfile_html,'<td>%s</td>',$dir1)
+               write('file',$reportfile_html,'</tr>')
+	       $m=$m+$maxlength+1
+	    until ($m>$dirlength)
+      else
+            write('file',$reportfile_html,'<td>%s</td>',$dir)
+      endif
+
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="header-table">')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Result</th>')
+      write('file',$reportfile_html,'</tr>')
+
+      $class='_CLASSHERE_'
+      $result='_RESULTHERE_'
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td class="%s">%s</td>',$class,$result)
+      write('file',$reportfile_html,'</tr>')
+
+      $padding=12
+      $padcount=1
+      repeat
+          write('file',$reportfile_html,'<tr>')
+          write('file',$reportfile_html,'<td></td>')
+          write('file',$reportfile_html,'</tr>')
+	  $padcount=$padcount+1
+      until ($padcount>$padding)
+      write('file',$reportfile_html,'</table>')
+
+      //Insert comments section
+      write('file',$reportfile_html,'<div style="width: 1px; height:580 px"></div>')
+      write('file',$reportfile_html,'<table class="header-table"')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Comments</th>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+
+      //Need to break IPcomment up into sub strings of 50 chars or less
+      length(IPcomment):$clength
+      $numlines=0
+      $maxlength=45
+      if ($clength>$maxlength) then
+          $numlines=trunc($clength/$maxlength+0.5)
+          string2array(IPcomment):$commentarray
+          $arraysize=size('$commentarray')
+          $n=1
+          repeat
+            $line='' $m=0
+	    repeat
+       	       $line=$line+$commentarray[$m+$n]+' '
+               length($line):$linelength
+	       $m=$m+1
+	       $tot=$n+$m
+            until (($tot>$arraysize) or ($linelength>$maxlength))
+            write('file',$reportfile_html,'<tr>')
+            write('file',$reportfile_html,'<td>%s</td>',$line)
+            write('file',$reportfile_html,'</tr>')
+	    $n=$n+$m
+          until ($n>$arraysize)
+      else
+           write('file',$reportfile_html,'<tr>')
+           write('file',$reportfile_html,'<td>%s</td>',IPcomment)
+           write('file',$reportfile_html,'</tr>')
+      endif
+      $n=1
+      $blanklines=40-$numlines
+      repeat
+          write('file',$reportfile_html,'<tr>')
+          write('file',$reportfile_html,'<td></td>')
+          write('file',$reportfile_html,'</tr>')
+	  $n=$n+1
+      until ($n>$blanklines)
+      write('file',$reportfile_html,'<div style="width: 1px; height:100 px"></div>')
+      write('file',$reportfile_html,'<table class="signature-table"')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="signature-one" size="30"></form></td>')
+      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="date-one" size="7"></form></td>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td width="200">%s</td>','XXXCUSTOMERXXX')
+      write('file',$reportfile_html,'<td>Date</td>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'<table class="signature-table"')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="signature-one" size="30"></form></td>')
+      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="date-one" size="7"></form></td>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<td width="200">%s</td>',IPoperator)
+      write('file',$reportfile_html,'<td>Date</td>')
+      write('file',$reportfile_html,'</tr>')
+      write('file',$reportfile_html,'</table>')
+      write('file',$reportfile_html,'</div>')
+
+
+      write('file',$reportfile_html,'<div class="table-container">')
+      write('file',$reportfile_html,'<h3 class="table-heading">System Test Results</h3>')
+      write('file',$reportfile_html,'<table>')
+      write('file',$reportfile_html,'<tr>')
+      write('file',$reportfile_html,'<th>Test Name</th>')
+      write('file',$reportfile_html,'<th>Measured Parameter</th>')
+      write('file',$reportfile_html,'<th width="60">Target</th>')
+      write('file',$reportfile_html,'<th>Result</th>')
+      write('file',$reportfile_html,'<th>Status</th>')
+      write('file',$reportfile_html,'</tr>')
+
+
    $i=1 $j=0 $l=1 $failcount=0 $warncount=0 $linecount=0
    $mode='odd'
+   $descarray=''
+   $filearray=''
+
    repeat
       $filename=$trunid[$i]
       $id='' $testname=''
@@ -195,196 +380,13 @@ ELSEIF ($function='update') THEN
 	   $j=$j+1
 	   //Use header info from first file to establish system info
 	   if ($j=1) then
-	      $date='' $time=''
-	      systemtime('%d%b%y'):$date
-	      systemtime('%H:%M'):$time
               teststr('$key1','CUSTOMER','local'):$e
               $customer=$val1[$e]
-              teststr('$key1','SYSTEM','local'):$e
-              $system=$val1[$e]
               teststr('$key1','PROBE','local'):$e
               $probe=$val1[$e]
-
-	      //Write header 
-	      write('reset',$reportfile_html)
-	      write('file',$reportfile_html,'<!DOCTYPE html>')
-	      write('file',$reportfile_html,'<html>')
-	      write('file',$reportfile_html,'<head>')
-	      write('file',$reportfile_html,'<title>Agilent VeriPulse Summary Report</title>')
-	      write('file',$reportfile_html,'<meta charset="utf-8">')
-	      write('file',$reportfile_html,'<link rel="stylesheet" type="text/css" href="veriPulse.css"/>')
-	      write('file',$reportfile_html,'</head>')
-	      write('file',$reportfile_html,'<body>')
-	      write('file',$reportfile_html,'<img src="img/agi_logo.png"/>')
-	      write('file',$reportfile_html,'<div class="container">')
-	      write('file',$reportfile_html,'<div class="header-table">')
-	      write('file',$reportfile_html,'<h3 style="margin: 20 px">VeriPulse Summary Report</h3>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Customer Name</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td>%s</td>',$customer)
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>System Name</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td>%s</td>',IPsysname)
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Test Operator</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td>%s</td>',IPoperator)
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Probe Name</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td>%s</td>',$probe)
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Test Start Time</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td>%s</td>',$starttime)
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Data Storage Directory</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-
-	      //if ($runid='all') then
-	      shell('dirname '+adirtmplt):$dir
-	      $dir2='' $dir3='' $maxlength=40
-	      length($dir):$dirlength
-	      if ($dirlength>$maxlength) then
-                    $numlines=trunc($dirlength/$maxlength+0.5)
-		    $m=1
-	            repeat
-		       $dir1=''
-		       substr($dir,$m,$m+$maxlength):$dir1
-	               write('file',$reportfile_html,'<tr>')
-	               write('file',$reportfile_html,'<td>%s</td>',$dir1)
-	               write('file',$reportfile_html,'</tr>')
-		       $m=$m+$maxlength+1
-		    until ($m>$dirlength)
-	      else
-	            write('file',$reportfile_html,'<td>%s</td>',$dir)
-	      endif
-
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="header-table">')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Result</th>')
-	      write('file',$reportfile_html,'</tr>')
-
-	      $class='_CLASSHERE_'
-	      $result='_RESULTHERE_'
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td class="%s">%s</td>',$class,$result)
-	      write('file',$reportfile_html,'</tr>')
-
-	      $padding=12
-	      $padcount=1
-	      repeat
-	          write('file',$reportfile_html,'<tr>')
-	          write('file',$reportfile_html,'<td></td>')
-	          write('file',$reportfile_html,'</tr>')
-		  $padcount=$padcount+1
-	      until ($padcount>$padding)
-	      write('file',$reportfile_html,'</table>')
-
-	      //Insert comments section
-	      write('file',$reportfile_html,'<div style="width: 1px; height:580 px"></div>')
-	      write('file',$reportfile_html,'<table class="header-table"')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Comments</th>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-
-	      //Need to break IPcomment up into sub strings of 50 chars or less
-	      length(IPcomment):$clength
-	      $numlines=0
-	      $maxlength=45
-              if ($clength>$maxlength) then
-	          $numlines=trunc($clength/$maxlength+0.5)
-	          string2array(IPcomment):$commentarray
-	          $arraysize=size('$commentarray')
-	          $n=1
-	          repeat
-	            $line='' $m=0
-		    repeat
-  	       	       $line=$line+$commentarray[$m+$n]+' '
-	               length($line):$linelength
-		       $m=$m+1
-		       $tot=$n+$m
- 	            until (($tot>$arraysize) or ($linelength>$maxlength))
-	            write('file',$reportfile_html,'<tr>')
-	            write('file',$reportfile_html,'<td>%s</td>',$line)
-	            write('file',$reportfile_html,'</tr>')
-		    $n=$n+$m
-	          until ($n>$arraysize)
-	      else
-	           write('file',$reportfile_html,'<tr>')
-	           write('file',$reportfile_html,'<td>%s</td>',IPcomment)
-	           write('file',$reportfile_html,'</tr>')
-	      endif
-	      $n=1
-	      $blanklines=40-$numlines
-	      repeat
-	          write('file',$reportfile_html,'<tr>')
-	          write('file',$reportfile_html,'<td></td>')
-	          write('file',$reportfile_html,'</tr>')
-		  $n=$n+1
-	      until ($n>$blanklines)
-	      write('file',$reportfile_html,'<div style="width: 1px; height:100 px"></div>')
-	      write('file',$reportfile_html,'<table class="signature-table"')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="signature-one" size="30"></form></td>')
-	      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="date-one" size="7"></form></td>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td width="200">%s</td>',$customer)
-	      write('file',$reportfile_html,'<td>Date</td>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'<table class="signature-table"')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="signature-one" size="30"></form></td>')
-	      write('file',$reportfile_html,'<td class="form"><form><input type="text" name="date-one" size="7"></form></td>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<td width="200">%s</td>',IPoperator)
-	      write('file',$reportfile_html,'<td>Date</td>')
-	      write('file',$reportfile_html,'</tr>')
-	      write('file',$reportfile_html,'</table>')
-	      write('file',$reportfile_html,'</div>')
-
-
-	      write('file',$reportfile_html,'<div class="table-container">')
-	      write('file',$reportfile_html,'<h3 class="table-heading">System Test Results</h3>')
-	      write('file',$reportfile_html,'<table>')
-	      write('file',$reportfile_html,'<tr>')
-	      write('file',$reportfile_html,'<th>Test Name</th>')
-	      write('file',$reportfile_html,'<th>Measured Parameter</th>')
-	      write('file',$reportfile_html,'<th width="60">Target</th>')
-	      write('file',$reportfile_html,'<th>Result</th>')
-	      write('file',$reportfile_html,'<th>Status</th>')
-	      write('file',$reportfile_html,'</tr>')
-
+              $sedcmd1 = `'s/XXXCUSTOMERXXX/`+$customer+`/'`
+              $sedcmd2 = `'s/XXXPROBEXXX/`+$probe+`/'`
+              shell(`sed -e `+$sedcmd1+` -e `+$sedcmd2+` `+$reportfile_html+` > `+$reportfile_html+'.tmp; mv '+$reportfile_html+'.tmp '+$reportfile_html):$dum
 	   endif "header"
 
 	   //Establish number of results per test

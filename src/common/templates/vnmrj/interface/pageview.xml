@@ -36,7 +36,7 @@
     <entry loc="95 10" size="340 20"
       style="PlainText"
       vq="pdfplotpar"
-      vc="ckstring('$VALUE'):pdfplotpar[1]"
+      vc="ckstring('$VALUE',2):pdfplotpar[1]"
       set="$VALUE=pdfplotpar[1]"
       show="$ENABLE=(pdfplotpar[6]&lt;&gt;'')*2-1"
       />
@@ -68,14 +68,15 @@
         vq="pdfplotpar"
         vc="pdfplotpar[10]='y'"
         vc2="pdfplotpar[10]='n'"
-        set="$VALUE=(pdfplotpar[10]='y')"
+	show="$ENABLE=(pdfplotpar[4]='save')*2-1"
+        set="$VALUE=((pdfplotpar[10]='y') and (pdfplotpar[4]='save'))"
         />
     </group>
     <check loc="95 75" size="95 20"
       style="Label1"
       label="email"
       vq="email pdfplotpar"
-      vc="pdfplotpar[5]='email'"
+      vc="pdfplotpar[5]='email' pdfplotpar[4]='save'"
       vc2="pdfplotpar[5]=''"
       set="$VALUE=(pdfplotpar[5]='email')"
       show="$ENABLE=((emailflag='y') and (pdfplotpar[6]&lt;&gt;''))*2-1"
@@ -85,7 +86,7 @@
       label="File"
       vq="pdfplotpar"
       vc="pdfplotpar[4]='save'"
-      vc2="pdfplotpar[4]=''"
+      vc2="pdfplotpar[4]='' pdfplotpar[5]=''"
       set="$VALUE=(pdfplotpar[4]='save')"
       show="$ENABLE=(pdfplotpar[6]&lt;&gt;'')*2-1"
       />

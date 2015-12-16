@@ -1,9 +1,0 @@
-*.a
-*.o
-*.os
-*.so
-.sconsign
-.sconsign.dblite
-
-vjLCAnalysis
-

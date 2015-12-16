@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* SSnoesy -  2D cross relaxation experiment using S or SS "read" pulse
  
      Noesy for observation of exchangeable protons using a

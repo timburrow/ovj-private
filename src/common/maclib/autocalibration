@@ -169,9 +169,11 @@ IF ($arg = 'init') THEN
 	    vnmrjcmd('setpage','Acquire',$page)
     	endif
     else
+	calibmod='yes'
 	savesampglobal('cp','solvent samplename sdirtmplt adirtmplt svftmplt')
-    	writeparam(cursqexp+'/startqpar1/curpar','solvent samplename sdirtmplt adirtmplt svftmplt','current','add')
-    	writeparam(cursqexp+'/startqpar1/procpar','solvent samplename sdirtmplt adirtmplt svftmplt','current','add')
+    	writeparam(cursqexp+'/startqpar1/curpar','solvent samplename calibmod sdirtmplt adirtmplt svftmplt','current','add')
+    	writeparam(cursqexp+'/startqpar1/procpar','solvent samplename calibmod sdirtmplt adirtmplt svftmplt','current','add')
+	writeparam(cursqexp+'/wQtemppar','calibmod','current','add')
     endif
     return
 

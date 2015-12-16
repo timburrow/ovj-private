@@ -65,6 +65,9 @@ resumeQ 2 2 8 0 0 4 1 0 1 64
 clonemod 2 2 8 0 0 4 1 0 1 64
 1 "no"
 0
+calibmod 2 2 8 0 0 4 1 0 1 64
+1 "no"
+0
 clustermod 2 2 8 0 0 4 1 16384 1 64
 1 "no"
 0

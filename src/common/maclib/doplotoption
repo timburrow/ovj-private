@@ -308,7 +308,7 @@ ELSEIF ($1='logo') THEN
     exists('plotlogo','parameter','global'):$e
     if ($e) then
       if (plotlogo<>'') then
-        setpage('logo')
+        setpage('logo',plotlogo,0,wc2max,plotlogox,plotlogoy)
       endif
     else
       setpage('logo')

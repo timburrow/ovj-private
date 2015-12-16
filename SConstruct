@@ -1,3 +1,5 @@
+#
+
 import os
 import sys
 import string
@@ -8,6 +10,10 @@ if not ovjtools:
     print "OVJ_TOOLS env not found."
     print "For bash and variants, use export OVJ_TOOLS=<path>"
     print "For csh and variants,  use setenv OVJ_TOOLS <path>"
+    sys.exit(1)
+
+if not os.path.exists(ovjtools):
+    print "OVJ_TOOLS path "+ovjtools+" not found."
     sys.exit(1)
 
 # os.environ['OPENVNMRJ']="true"
@@ -51,23 +57,19 @@ buildList = string.split("""
                          acq
                          adm
                          dicom_djsm
-                         dicom_store
                          Diffusion
                          fidlib
                          fiddle
                          fonts
                          Gmap
                          IMAGE_patent
-                         license
                          Pbox
                          pipe
                          PFG
                          misc 
                          protune
-                         shuffler
                          shims
                          shimmethods
-                         stars
                          studylib
                          sudo.lnx
                          xml
@@ -103,25 +105,27 @@ buildList = string.split("""
 buildList = string.split("""
                          3D
                          autotest
+                         backproj
                          bin
                          biopack
                          biosolidspack
+                         dicom_store
                          DOSY
                          ddr
                          Gilson
                          gxyzshim
-                         ib
                          IMAGE
-                         kpsglib
                          languages
                          layouts
+                         license
                          LCNMR
-                         lcpeaks
                          p11
                          psglib
                          roboproc
                          scripts
+                         shuffler
                          solidspack
+                         stars
                          tcl
                          veripulse
                          vnmrbg
@@ -129,9 +133,6 @@ buildList = string.split("""
 
 acqBuildList = string.split("""
                          768AS
-                         ampfit
-                         backproj
-                         cgl
                          craft
                          Cryo2
                          CSI2
@@ -146,12 +147,16 @@ acqBuildList = string.split("""
                          """);
 
 acqBuildList = string.split("""
+                         ampfit
                          atproc
                          bootpd.rh51
+                         cgl
                          ddl
                          expproc
+                         ib
                          infoproc
                          inova
+                         kpsglib
                          mercury
                          nautoproc
                          nvexpproc
@@ -218,7 +223,8 @@ else:
    print "java link in "+ovjtools+" not found. Skipping java compiles"
 
 if ( os.path.exists(os.path.join('/usr','lib','libgsl.so')) or
-     os.path.exists(os.path.join('/usr','lib64','libgsl.so')) ):
+     os.path.exists(os.path.join('/usr','lib64','libgsl.so')) or
+     os.path.exists(os.path.join('/usr','lib','libgsl.a')) ):
    for i in gslBuildList:
       SConscript(os.path.join('src',i, 'SConstruct'))
 else:

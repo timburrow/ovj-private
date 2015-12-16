@@ -35,15 +35,15 @@ vnmrDiffParamsFileList = ['assign.c',
                           'variables1.c']
 
 # build environments
-diffEnv = Environment(CCFLAGS    = '-O -Wall -m32',
+diffEnv = Environment(CCFLAGS    = '-O -Wall -m64',
                       CPPDEFINES = ['LINUX'],
-                      LINKFLAGS  = '-m32',
+                      LINKFLAGS  = '-m64',
                       CPPPATH    = [cwd])
 
 if ('interix' in platform):    # Interix
    interixgcc= os.path.join(os.sep,'opt','gcc.3.3','bin','gcc')
    diffEnv.Replace( CC=interixgcc )
-   diffEnv.Replace(  LINKFLAGS='-O -m32' )
+   diffEnv.Replace(  LINKFLAGS='-O -m64' )
    diffEnv.AppendUnique(  CPPDEFINES=[ '_ALL_SOURCE','__INTERIX','LINUX']  )
    diffEnv.Append(  LIBPATH=[ os.path.join(os.sep, 'usr','lib','x86'), os.path.join(os.sep, 'usr','lib')
  ]  )

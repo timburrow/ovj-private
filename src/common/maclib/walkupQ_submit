@@ -28,7 +28,7 @@
    array2string($parlng):longlist
    explist=$parflg
 
-   if ($resume='') then
+   if ($resume='') and calibmod='no' then
      setadirtmplt
      setsvftmplt
      setsdirtmplt

@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <dirent.h>
@@ -471,6 +471,7 @@ RQgroup::setSelection(string str)
     string fstr="NA";
 
     int p1, p2;
+    p2 = 0;
     if((p1 = str.find(" ", 1)+1) != string::npos &&
            (p2 = str.find(" ", p1+1)) != string::npos)
             istr = str.substr(p1, p2-p1);

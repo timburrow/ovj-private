@@ -346,7 +346,8 @@ ELSEIF ($arg2='last') or ($arg2 = 'first') THEN
 		if $active>-0.5 then
 		    rtv($archsamp+'/'+$lastname,'noabort','lockfreq_'):$lockfreq
 		endif
-		if ($lockfreq<>lockfreq) then
+                abs(lockfreq-$lockfreq):$diff
+                if ($diff > 0.001) then
 		    $lastname=''
 		elseif ($checktn<>'') or ($checkdn<>'') then
 		    rtv($archsamp+'/'+$lastname,'tn'):$tn

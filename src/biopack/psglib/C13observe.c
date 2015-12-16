@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /*  C13observe  
      spinecho option following s2pul
      p1 and pw pulses are at pwClvl power level

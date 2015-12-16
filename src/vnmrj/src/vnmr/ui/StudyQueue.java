@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 package  vnmr.ui;
@@ -12,6 +12,7 @@ package  vnmr.ui;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.io.File;
 import javax.swing.*;
 import vnmr.bo.*;
 import vnmr.util.*;
@@ -44,6 +45,7 @@ public class StudyQueue implements VObjDef
     static public String VALIDATE = "validate";
     static public String GET      = "get";
     static public String READ     = "read";
+    static public String READDEL  = "readDelete";
     static public String ADD      = "add";
     static public String WRITE    = "write";
     static public String NWRITE   = "nwrite";
@@ -481,6 +483,28 @@ public class StudyQueue implements VObjDef
                 mgr.newTree(path);
 		// set sqdirs[jviewport]=path
 		sendSQpath(path);
+            }
+        }
+        // syntax:    vnmrjcmd('SQ readDelete filename.xml [<macro>]')
+        else if (cmd.equals(READDEL)) {
+            String fn = tok.nextToken().trim();
+            File fp = new File(fn);
+
+            if (mgr.isExecuting()) {
+                postWarning("cannot load a new study while queue is executing");
+                fp.delete();
+                return;
+            } else {
+                String path = FileUtil.openPath(fn);
+                if (path == null) {
+                    fp.delete();
+                    postError("cannot load study file " + fn);
+                    return;
+                }
+                mgr.newTree(path);
+		// set sqdirs[jviewport]=path
+		sendSQpath(path);
+                fp.delete();
             }
         }
         // syntax:    vnmrjcmd('SQ write filename.xml [<macro>]')

@@ -60,7 +60,7 @@
     style="PlainText"
     justify="Left"
     orientation="Horizontal"
-    icon="/vnmr/iconlib/agilent_sbsr.gif"
+    icon="/vnmr/iconlib/vnmrjNameSml.gif"
     elastic="Fit Only"
     units="40"
     row="2"

@@ -18,7 +18,8 @@ if ($newautodir='daily') and ($isactive>-1) then
     endif
     if (autodir<>'') then
 	$adirdate=''
-	lookup('mfile',autodir+'/enterQ.macdir/DATE_runstart','read',1):$adirdate
+	shell('(cat '+autodir+'/enterQ.macdir/DATE_runstart | tail -n 1)'):$adirdate
+//	lookup('mfile',autodir+'/enterQ.macdir/DATE_runstart','read',1):$adirdate
 	strstr($adirdate,'_'):$ret,$adirdate
 	if not $ret then autodir='' 
 	else
@@ -176,7 +177,12 @@ if ($longrun <> $oldlongrun) and ($isactive>-1) then
    shell('(cat '+$AUTOGLOBAL+' | grep -vw LONGRUN: > '+$AUTOGLOBAL+'1)'):$dum
    write('file',$AUTOGLOBAL+'1','LONGRUN: %s',$longrun)
    shell('mv '+$AUTOGLOBAL+'1 '+$AUTOGLOBAL):$dum
-   if ($isactive>-1) and ($longrun<>'y') then setupautomerge(autodir) endif
+   if ($isactive>-1) and ($longrun<>'y') then 
+	setupautomerge(autodir) 
+    	$date=''
+    	shell('date +%Y-%m-%d_%H%M%S'):$date
+	write('file',autodir+'/enterQ.macdir/DATE_runstart','%s',$date)
+    endif
    shell('chmod a+rw '+$AUTOGLOBAL):$dum
 endif
 wrautoinfo('auto'):$curAutoDirOK

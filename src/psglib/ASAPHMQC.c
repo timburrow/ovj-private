@@ -1,7 +1,7 @@
-// Copyright (C) 2015  Stanford University
+// Copyright (C) 2015  University of Oregon
 // You may distribute under the terms of either the GNU General Public
-// License or the Apache License, as specified in the README file.
-// For more information, see the README file.
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 /* ASAP_hmqc.c - ASAP - Acceleration by Sharing Adjacent Polarization
 		 E. Kupce and R. Freeman, Magn. Reson. Chem., v.45 pp.2-4 (2007).
 

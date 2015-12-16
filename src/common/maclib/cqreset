@@ -57,7 +57,7 @@ samplename=''
 notebook=''
 page=''
 
-cqrempars('rt')  // retrieve remembered parameters if enabled
+// cqrempars('rt')  // retrieve remembered parameters if enabled
 
 wexp=''
 ctext

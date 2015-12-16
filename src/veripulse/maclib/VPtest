@@ -9,7 +9,7 @@ $max=50
 if ($action = 'init') then
 
   destroy('VPtype VPtestID VPtests VPlabel VPlabel2 VPcheckbox VPcheckbox2 VPshow VPenable'):$e
-  destroy('VPorder VPmacro VPsample VPsamplename VPduration VPalock VPwshim VPshimmethod `VPtune'):$e
+  destroy('VPorder VPmacro VPsample VPsamplename VPduration VPalock VPwshim VPshimmethod VPtune'):$e
   destroy('VPtest VPresults VPresult VPresultLabel'):$e
   create('VPtype','string')
   create('VPtestID','string')

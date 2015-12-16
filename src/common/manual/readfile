@@ -1,5 +1,6 @@
 
 readfile(path, 'par1', 'par2', <,cmpstr <,tree> >):num
+readfile(path, 'par1', 'par2', 'JCAMP' <,tree> >):num  reads a JCAMP file
 
 readfile reads the contents of a file and puts the contents into two
 supplied parameters.  The first word on each line in the file is placed in the
@@ -74,3 +75,18 @@ For example,
 teststr(attr,'H1pwr'):$e
 
 vals[$e] will be the value of 'H1Pwr'
+
+If the cmpstr is set to JCAMP, then readfile expects the input file to
+be a JCAMP file. Lines with # are no longer comment lines. Comments start
+with $$. The attr parameter will be set to the Labelled-Data-Record (LDR)
+label and the vals parameter will contain the LDR value. LDR's that are
+defined between the ## and = (i.e., global LDR) or between ##. and =
+(i.e., datatype specific LDR) will be converted according to the JCAMP rules
+(all upper case, remove spaces, dashes, slashes, and underlines).
+LDR's that are defined between ##$ and = (i.e., private LDR) will be returned
+as is. This command only recognizes data sets stored as NTUPLES. It will
+store the data as real - imaginary pairs as an ASCII file in the current
+experiment with the name jcampData. The jcampData file can be used by the
+makefid command to read the data into an experiment. If readfile has an
+error while reading a JCAMP file, it will return a 0 to the calling macro.
+On success, it will return the number of LDRs in the JCAMP file.

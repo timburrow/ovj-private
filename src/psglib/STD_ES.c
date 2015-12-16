@@ -1,7 +1,7 @@
-// Copyright (C) 2015  Stanford University
+// Copyright (C) 2015  University of Oregon
 // You may distribute under the terms of either the GNU General Public
-// License or the Apache License, as specified in the README file.
-// For more information, see the README file.
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 /*STD_ES  1D STD Saturation Transfer Difference experiment with
 	DPFGSE sculpted solvent suppression 
 	Reference (STD): Mayer and Meyer J.A.Ch.Soc.2001,123,6108-6117

@@ -27,17 +27,9 @@ else
    wexp='donelocref'
 endif
 
-$status='' $who='' $sampname=''
-checklocstatus(autodir+'/enterQ',loc):$status,$who,$sampname
-if ($sampname='ReFeReNCe') then
-    active2error
-    write('file',autodir+'/enterQ.macdir/cpstartQ','SAMPLE#: %d loc%d',loc,loc)
-    if ((traymax=97) and (loc=96)) or (loc=traymax) then
-//    if (loc=traymax) then
-	getautoglobaltemp
-    endif
-endif
-
+active2error
+write('file',autodir+'/enterQ.macdir/cpstartQ','SAMPLE#: %d loc%d',loc,loc)
+getautoglobaltemp('auto')
 $autoname=autoname
 autoname='_REFERENCE_%SAMPLE#:%'
 dg

@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <stdio.h>
@@ -17,7 +17,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
+#ifndef P11
+#include "vnmrsys.h"
 
+#undef MAXSTR
+#endif
 #define MAXSTR 1024
 #define MAXWORDS 64
 #define BUFSIZE 1024
@@ -29,17 +33,20 @@ static int debug = 0;
 
 static string sysOwnedSafecp = "/vnmr/p11/bin/safecp";
 static string usrOwnedSafecp = "/vnmr/bin/safecp";
-static char* systemdir;
-static char* userdir;
 
 #ifndef P11
 extern void currentDate(char* cstr, int len );
+#else
+static char* systemdir;
+static char* userdir;
 #endif
 
 static void initGlobal() {
 
+#ifdef P11
     systemdir = getenv("vnmrsystem");
     userdir = getenv("vnmruser");
+#endif
 
     if(systemdir != NULL) {
 	strcpy(sysOwnedSafecp, systemdir);

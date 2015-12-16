@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2015  Stanford University
- *
- * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
- *
- * For more information, see the README file.
- */
+// Copyright (C) 2015  University of Oregon
+// You may distribute under the terms of either the GNU General Public
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 
 # line 10 "magic.gram.y"
 
@@ -377,11 +373,15 @@ yystack:				/* push state and value */
    if (yydebug)
       printf("state %d, char 0%o\n",yystate,yychar);
 #endif 
+#ifdef MACOS
+   ++yyps;
+#else
    if (&yys[YYMAXDEPTH-4] < ++yyps)
    {  yyerror( "yacc stack overflow" );
       WerrprintfWithPos("Macro too long and complicated");
       return(1);
    }
+#endif
    *yyps = yystate;
    yypv += 1;
    *yypv = yyval;

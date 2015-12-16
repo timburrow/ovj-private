@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <stdio.h>
@@ -2483,7 +2483,7 @@ void Gframe::loadOverlayImg(char *path, char *cmapName, int colormapId) {
    else {
       string colorMapName = getString("aipOverlayColor", "");
       if(colorMapName != "") setColormap((char *)colorMapName.c_str()); 
-      else if(cmapName != "") setColormap(cmapName);
+      else if( strcmp(cmapName,"") ) setColormap(cmapName);
    }
    draw();
 

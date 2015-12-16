@@ -6,7 +6,7 @@ exists(plotlogo,'file'):$fex
 if $fex and plotlogo<>'' then $logo=plotlogo endif
 
 if ($fex=0) then
-  $logo=systemdir+'/iconlib/agilentlogo.gif'
+  $logo=systemdir+'/iconlib/vnmrjNameSml.gif'
   exists($logo,'file'):$fex
 endif
 if ($fex=0) then $logo='' endif

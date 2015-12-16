@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* gNT1.c     Heteronuclear T1 with TROSY option
 
 	written by Youlin Xia, HKUST on Jan. 20, 1999.

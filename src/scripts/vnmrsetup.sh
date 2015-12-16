@@ -1,5 +1,14 @@
 #! /bin/sh
-# '@(#)vnmrsetup.sh '
+#
+#
+# Copyright (C) 2015  University of Oregon
+# 
+# You may distribute under the terms of either the GNU General Public
+# License or the Apache License, as specified in the LICENSE file.
+# 
+# For more information, see the LICENSE file.
+# 
+
 #
 #   aka load.nmr 
 #
@@ -162,9 +171,9 @@ form_dest_dir() {
     versionLine=`grep VnmrJ_SE ${base_dir}/vnmrrev | wc -l`
     if [ $versionLine -eq 1 ]
     then
-       vname=vnmrjSE_
+       vname=openvnmrjSE_
     else
-       vname=vnmrj_
+       vname=openvnmrj_
     fi
 
     $GREP -i -E 'alpha|beta|devel|test'  ${base_dir}/vnmrrev 2> /dev/null

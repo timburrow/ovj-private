@@ -5,6 +5,39 @@
 $mode=''
 if ($#>0.5) then $mode=$1 endif
 
+// A 2nd argument can be supplied to override the 
+//  default adjusted cosine window pipe uses
+//  This section was introduced as a convenience for
+//  craft.  The default window (adj cosine) is preferable
+//  for normal operation.
+//  This override is only for the F1 dimension
+//  craft 'likes' to use a simple cosine.  The 2nd
+//  argument would be '0.5 1 1' for cosine. These would
+//  be passed to -yQ1, -yQ2 and -yQ3 arguments for $pipe_cmd
+
+if ($# < 2) then 
+    exists('pipeF1window','parameter'):$parex
+    if $parex then $2=pipeF1window else $2='' endif
+endif
+$f1window=$2
+substr($f1window,'wc'):$words
+if $words<>3 then $f1window='' endif
+$w=1
+while $w<=$words do
+    $s1='' substr($f1window,$w):$s1
+    format($s1,'isreal'):$real
+    if not $real then $f1window='' $w=$words endif
+    $w=$w+1
+endwhile
+substr($f1window,'wc'):$words
+if $words=3 then
+    $s1='' substr($f1window,1):$s1 $s2='-yQ1 '+$s1
+    $s1='' substr($f1window,2):$s1 $s2=$s2+' -yQ2 '+$s1
+    $s1='' substr($f1window,3):$s1 $s2=$s2+' -yQ3 '+$s1
+    $f1window=$s2
+endif
+// $f1window section is done
+
 getbinpath('vj2pipe.com'):$pipeex,$pipe
 getbinpath('vnmrpipe'):$ok,$prg
 strstr(file,'enterQ.macdir'):$current
@@ -144,7 +177,7 @@ if ($nDIM < 3) then
         
 	$pipe_cmd=' xterm -iconic -geom 30x20 -bg dodgerblue3 -fg white -cr white   -T NMRPipe -e " '\
                   + $prg +' vj2pipe.com    -nograph  -clean -cd '+curexp+ ' -vjfid ' + curexp+  '/acqfil/fid '\
-		  + ' -istTMult '+pipeistTMult+' -istCMult '+pipeistCMult+' -istIter '+pipeistIter+' -istMaxRes '+pipeistMaxRes\
+		  + ' '+$f1window+' -istTMult '+pipeistTMult+' -istCMult '+pipeistCMult+' -istIter '+pipeistIter+' -istMaxRes '+pipeistMaxRes\
                   + '  -pipeDir '+  curexp+ '/pipe '  + ' -procpar ' +  curexp+ '/curpar'\
                   + $xZFarg + $yZFarg + $zZFarg + $progress + $option +'; sleep 5" '
  
@@ -152,7 +185,7 @@ if ($nDIM < 3) then
 	if $csreconex then
 	    if CSreconmethod<>'IST' then CSreconmethod='IST' endif
 	endif 
-//	echo($pipe_cmd)
+//	$pipe_cmd?
 	shell($pipe_cmd)
 	wft(1)
 	pread(curexp+'/pipe/spec_ist.ft2')
@@ -163,7 +196,13 @@ if ($nDIM < 3) then
 // record some key values in the pipe directory
 // This helps to decide (by other macros) if reprocessing is required
 // For now record fn,fn1,fn2 and file parameters
-	writeparam(curexp+'/pipe/PipePar','fn fn1 fn2 file pipeGLB pipeELB','current')
+	if $f1window<>'' then
+	    create('pipeF1window','string','current',$2):$dum
+	endif
+	writeparam(curexp+'/pipe/PipePar','fn fn1 pipeF1window fn2 file pipeGLB pipeELB','current')
+	if $f1window<>'' then
+	    destroy('pipeF1window'):$dum
+	endif
 
 endif // for 2D case
 

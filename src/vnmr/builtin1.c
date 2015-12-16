@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /*------------------------------------------------------------------------------
@@ -2945,8 +2945,548 @@ parameter to determine the index of a specified element.
 For example,
 teststr(attr,'H1pwr'):$e
 vals[$e] will be the value of 'H1Pwr'
+
+If the cmpstr is set to JCAMP, then readfile expects the input file to
+be a JCAMP file. Lines with # are no longer comment lines. Comments start
+with $$. The attr parameter will be set to the Labelled-Data-Record (LDR)
+label and the vals parameter will contain the LDR value. LDR's that are
+defined between the ## and = (i.e., global LDR) or between ##. and =
+(i.e., datatype specific LDR) will be converted according to the JCAMP rules
+(all upper case, remove spaces, dashes, slashes, and underlines).
+LDR's that are defined between ##$ and = (i.e., private LDR) will be returned
+as is. This command only recognizes data sets stored as NTUPLES. It will
+store the data as real - imaginary pairs as an ASCII file in the current
+experiment with the name jcampData. The jcampData file can be used by the
+makefid command to read the data into an experiment.
+
 ************************************************************************/
 
+
+
+#define JCAMP_GLOBAL    1
+#define JCAMP_SPECIFIC  2
+#define JCAMP_PRIVATE   3
+#define JCAMP_DATA      4
+#define JCAMP_ERROR     5
+
+static int *iptrJcamp = NULL;
+static int *jptrJcamp = NULL;
+
+static char *getValue(char *buf)
+{
+   static char tmp[1024];
+   int i, j;
+
+   tmp[0] = '\0';
+   i = j = 0;
+   if ( buf[i] == '=' )
+   {
+      i++;
+      while ( ( buf[i] == ' ' ) || (buf[i] == '\t') )
+         i++;
+      while ( buf[i] != '\0' )
+      {
+         tmp[j++] = buf[i++];
+      }
+   }
+   tmp[j] = '\0';
+   return(tmp);
+}
+
+static int getLDR(char *buf, char *ldr)
+{
+   int i = 0;
+   int j = 0;
+   int isCore;
+
+   // skip white space
+   ldr[0] = '\0';
+   isCore = 1;
+   while ( ( buf[i] == ' ' ) || (buf[i] == '\t') )
+      i++;
+   if ( (buf[i] == '#') && (buf[i+1] == '#') )
+   {
+      i += 2;
+      if (buf[i] == '$')
+         isCore = 0;
+      if ( (buf[i] == '.') || (buf[i] == '$') )
+         i++;
+      while ( (buf[i] != '=') && (buf[i] != '\0') )
+      {
+         if (isCore)
+         {
+            if ( (buf[i] >= 'a') && (buf[i] <= 'z') )
+            {
+               ldr[j++] = buf[i] - 'a' + 'A';
+            }
+            else if ( (buf[i] >= 'A') && (buf[i] <= 'Z') )
+            {
+               ldr[j++] = buf[i];
+            }
+            else if ( (buf[i] >= '0') && (buf[i] <= '9') )
+            {
+               ldr[j++] = buf[i];
+            }
+         }
+         else
+         {
+            ldr[j++] = buf[i];
+         }
+         i++;
+      }
+      ldr[j] = '\0';
+      return(i);
+   }
+   return(-1);
+}
+
+static void checkchar(int ch, char *val, int *ycheck, int *dup, int *diff)
+{
+   *dup = *diff = 0;
+   switch (ch)
+   {
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+         sprintf(val,"%c",ch);
+         break;
+      case '@':
+         strcpy(val,"+");
+         break;
+      case 'A':
+      case 'B':
+      case 'C':
+      case 'D':
+      case 'E':
+      case 'F':
+      case 'G':
+      case 'H':
+      case 'I':
+         sprintf(val,"%c",ch-'A'+'1');
+         break;
+      case 'a':
+      case 'b':
+      case 'c':
+      case 'd':
+      case 'e':
+      case 'f':
+      case 'g':
+      case 'h':
+      case 'i':
+         sprintf(val,"-%c",ch-'a'+'1');
+         break;
+      case '%':
+         strcpy(val,"+");
+         *diff = 1;
+         *ycheck = 1;
+         break;
+      case 'J':
+      case 'K':
+      case 'L':
+      case 'M':
+      case 'N':
+      case 'O':
+      case 'P':
+      case 'Q':
+      case 'R':
+         sprintf(val,"%c",ch-'J'+'1');
+         *diff = 1;
+         *ycheck = 1;
+         break;
+      case 'j':
+      case 'k':
+      case 'l':
+      case 'm':
+      case 'n':
+      case 'o':
+      case 'p':
+      case 'q':
+      case 'r':
+         sprintf(val,"-%c",ch-'j'+'1');
+         *diff = 1;
+         *ycheck = 1;
+         break;
+      case 'S':
+      case 'T':
+      case 'U':
+      case 'V':
+      case 'W':
+      case 'X':
+      case 'Y':
+      case 'Z':
+         sprintf(val,"%c",ch-'S'+'1');
+         *dup = 1;
+         break;
+      case 's':
+         strcpy(val,"9");
+         *dup = 1;
+         break;
+   }
+}
+
+static int writedata(FILE *oFile, char *buffer, int *xcheck, int *ycheck,
+                     int totalPts, int *pts, float factor)
+{
+   int len;
+   int i;
+   int j;
+   char num[1024];
+   static int last = 0;
+   int dup;
+   int xch;
+   int diff;
+   int lastnum = 0;
+   int lastdiff = 0;
+   int doXcheck = 0;
+
+   len = strlen(buffer);
+   if ( *xcheck == -1)
+      last = 0;
+
+   i = 0;
+   // skip white space
+   while ( ( buffer[i] == ' ' ) || (buffer[i] == '\t') )
+      i++;
+   // get xcheck number
+   checkchar(buffer[i], num, ycheck, &dup, &diff);
+   i++;
+   j = strlen(num);
+   while ( ((buffer[i] >= '0') && (buffer[i]<= '9')) || (buffer[i] == '.') )
+
+   {
+      num[j++] = buffer[i++];
+   }
+   num[j] = '\0';
+   if (doXcheck)
+   {
+      xch = atoi(num);
+      if ( (*xcheck != -1 ) && (xch  != *xcheck))
+      {
+         Werrprintf("JCAMP xcheck failure");
+         return(-1);
+      }
+   }
+   if (*ycheck)
+   {
+      // skip white space
+      while ( ( buffer[i] == ' ' ) || (buffer[i] == '\t') )
+         i++;
+      // get ycheck number
+      checkchar(buffer[i], num, ycheck, &dup, &diff);
+      i++;
+      j = strlen(num);
+      while ((buffer[i] >= '0') && (buffer[i]<= '9') )
+      {
+         num[j++] = buffer[i++];
+      }
+      num[j] = '\0';
+      xch = atoi(num);
+      if (xch != last)
+      {
+         Werrprintf("JCAMP ycheck failure");
+         return(-1);
+      }
+   }
+   while (i < len)
+   {
+      *xcheck += 1;
+      while ( ( buffer[i] == ' ' ) || (buffer[i] == '\t') )
+         i++;
+      checkchar(buffer[i], num, ycheck, &dup, &diff);
+      if (dup)
+      {
+         i++;
+         xch = atoi(num);
+
+         xch--;
+         *xcheck += (xch-1);
+         while (xch > 0)
+         {
+            xch--;
+            last += lastnum;
+            if (factor == 0.0)
+            {
+               if ( *pts < totalPts)
+               {
+                  (*pts)++;
+                  *iptrJcamp = last;
+                  iptrJcamp++;
+               }
+               else
+               {
+                  Werrprintf("JCAMP number of points mismatch");
+                  return(-1);
+               }
+            }
+            else
+            {
+               fprintf(oFile,"%-9g %-9g\n", *jptrJcamp * factor, last * factor);
+               jptrJcamp++;
+            }
+         }
+      }
+      else
+      {
+      
+         i++;
+         j = strlen(num);
+         while ((buffer[i] >= '0') && (buffer[i]<= '9') )
+         {
+            num[j++] = buffer[i++];
+         }
+         num[j] = '\0';
+         lastnum = atoi(num);
+         lastdiff = diff;
+         if (diff)
+         {
+            xch = lastnum + last;
+            last = xch;
+         }
+         else
+         {
+            last = xch = lastnum;
+         }
+         if (factor == 0.0)
+         {
+            if ( *pts < totalPts)
+            {
+               (*pts)++;
+               *iptrJcamp = last;
+               iptrJcamp++;
+            }
+            else
+            {
+               Werrprintf("JCAMP number of points mismatch");
+               return(-1);
+            }
+         }
+         else
+         {
+            fprintf(oFile,"%-9g %-9g\n", *jptrJcamp * factor, last * factor);
+            jptrJcamp++;
+         }
+      }
+
+   }
+   return(0);
+}
+
+
+static int linetype(char *line)
+{
+   char *ptr;
+
+   ptr = line;
+   while ( ( *ptr == ' ' ) || ( *ptr == '\t' ) )
+      ptr++;
+   if ( ( *ptr == '#' ) && ( *(ptr+1) == '#') )
+   {
+      ptr += 2;
+      if ( *ptr == '.' )
+         return(JCAMP_SPECIFIC);
+      if ( *ptr == '$' )
+         return(JCAMP_PRIVATE);
+      return(JCAMP_GLOBAL);
+   }
+   return(JCAMP_DATA);
+}
+
+static int getlineNoComments(FILE *path, char line[], int limit)
+{
+  int ch,i;
+  int hasComment;
+  int done;
+
+  done = 0;
+  while ( ! done )
+  {
+     hasComment = -2;
+     ch = line[0] = '\0';
+     i = 0;
+     while ((i < limit -1) && ((ch = getc(path)) != EOF) && (ch != '\n'))
+     {
+       line[i++] = ch;
+       if ( (hasComment == -2) && (ch == '$') )
+       {
+          hasComment = -1;
+       }
+       else if ( (hasComment == -1) && (ch == '$') )
+       {
+          hasComment = i-1;
+       }
+       else if (hasComment == -1)
+       {
+          hasComment = -2;
+       }
+     }
+     line[i] = '\0';
+     if (hasComment >= 0)
+     {
+        i = hasComment - 1;
+        while ( (i > 0) && ( (line[i-1] == ' ') || (line[i-1] == '\t') ) )
+           i--;
+     }
+     // check for windows end of line '\r\n'
+     while (i && ( (line[i-1] == '\r') || (line[i-1] == '\n')) )
+        i--;
+     line[i] = '\0';
+     if ( (i > 0) || (ch == EOF) )
+     {
+        done = 1;
+     }
+  }
+  if ((i == 0) && (ch == EOF))
+     return(0);
+  else
+     return(1);
+}
+
+static int jcamp(FILE *iFile, varInfo *v1, varInfo *v2)
+{
+   FILE *oFile = NULL;
+   float factor = 0.0;
+   int xcheck, ycheck;
+   char buffer[2048];
+   char outFile[2048];
+   int  numRows=0;
+   int  numPts=0;
+   char ldr[1024];
+   int index;
+   int error = 0;
+   int npx = 0;
+   int dataPage = 0;
+   int doingData = 0;
+
+   iptrJcamp= NULL;
+   jptrJcamp = NULL;
+
+   sprintf(outFile,"%s/jcampData",curexpdir);
+   if ( (oFile = fopen(outFile,"w")) == NULL)
+   {
+      Werrprintf("Cannot open JCAMP data file %s",outFile);
+      error = 1;
+   }
+
+   xcheck = -1;
+   ycheck = 0;
+   while ( ! error && getlineNoComments(iFile, buffer, sizeof(buffer)) )
+   {
+/*
+      fprintf(oFile,"%s\n",buffer);
+ */
+       switch ( linetype(buffer) )
+       {
+          case JCAMP_GLOBAL:
+                xcheck = -1;
+                ycheck = 0;
+                numPts = 0;
+                if (dataPage == 1)
+                   dataPage = 2;
+
+                index = getLDR(buffer,ldr);
+                if (index > 0)
+                {
+                   if ( ! strcmp(ldr,"DATACLASS") )
+                   {
+                      if ( strcmp(getValue(buffer+index),"NTUPLES") )
+                      {
+                         Werrprintf("Only handles NTUPLES JCAMP data");
+                         error = 1;
+                      } 
+                   }
+                   if ( ! strcmp(ldr,"DATATABLE") )
+                      doingData = 1;
+                   else
+                      doingData = 0;
+                   if ( ! strcmp(ldr,"VARDIM") )
+                      npx = atoi(getValue(buffer+index));
+                   if ( ! strcmp(ldr,"FACTOR") )
+                   {
+                      char *ptr = buffer+index;
+                      while ( ( *ptr == ' ' ) || (*ptr == '\t') )
+                         ptr++;
+                      while ( (*ptr != ',') && (*ptr != '\0') )
+                         ptr++;
+                      if ( *ptr == ',' )
+                      {
+                         ptr++;
+                         factor = atof(ptr);
+                      }
+                      else
+                      {
+                         Werrprintf("Cannot access JCAMP FACTOR parameter");
+                         error = 1;
+                      }
+                   }
+                   if ( ! error )
+                   {
+                      numRows++;
+                      assignString(ldr,v1,numRows);
+                      assignString(getValue(buffer+index),v2,numRows);
+                   }
+                }
+                break;
+          case JCAMP_SPECIFIC:
+          case JCAMP_PRIVATE:
+                index = getLDR(buffer,ldr);
+                if (index > 0)
+                {
+                   numRows++;
+                   assignString(ldr,v1,numRows);
+                   assignString(getValue(buffer+index),v2,numRows);
+                }
+                break;
+          case JCAMP_DATA:
+                if (doingData)
+                {
+                   if ( npx == 0)
+                   {
+                      Werrprintf("Cannot access JCAMP VARDIM parameter");
+                      error = 1;
+                   }
+                   if ( factor == 0.0)
+                   {
+                      Werrprintf("Cannot access JCAMP FACTOR parameter");
+                      error = 1;
+                   }
+                   if ( ! error )
+                   {
+                      int ret;
+                      if ( iptrJcamp == NULL )
+                      {
+                         jptrJcamp = iptrJcamp = (int *)allocateWithId(npx * sizeof(int),"jcamp");
+                      }
+                      if (dataPage == 0)
+                         dataPage = 1;
+                      if (dataPage == 1)
+                         ret = writedata(oFile, buffer, &xcheck, &ycheck,
+                                         npx, &numPts, 0.0);
+                      else
+                         ret = writedata(oFile, buffer, &xcheck, &ycheck,
+                                         npx, &numPts, factor);
+                      if (ret == -1)
+                         error = 1;
+                   }
+                }
+                break;
+          default:
+                break;
+       }
+   }
+   if (iptrJcamp)
+      releaseWithId("jcamp");
+   fclose(oFile);
+   if (error)
+      return(0);
+   return(numRows);
+}
 
 static int priv_getline(FILE *path, char *line,int limit);
 
@@ -2961,6 +3501,7 @@ int readfile(int argc, char *argv[], int retc, char *retv[])
     FILE *inputFile;
     int  length, i, numRows=0;
     char *path, *cmpstr=NULL;
+    int jcampFlag = 0;
 
     /* Put args into variables */ 
     /* Must be at least 3 args */
@@ -2974,7 +3515,11 @@ int readfile(int argc, char *argv[], int retc, char *retv[])
     {
       /* ignore if cmpstr is a null string */
       if (strlen(argv[4]))
+      {
         cmpstr = argv[4];
+        if ( ! strcmp(cmpstr,"JCAMP"))
+           jcampFlag = 1;
+      }
     }
     tree = "current";
     if (argc == 6)
@@ -3006,6 +3551,19 @@ int readfile(int argc, char *argv[], int retc, char *retv[])
     {   Werrprintf("%s: variable \"%s\" doesn't exist",argv[0],argv[3]);
         ABORT;
     }
+    if (jcampFlag)
+    {
+       if (v1->T.basicType == T_REAL)
+       {
+          Werrprintf("%s: variable \"%s\" must be string type",argv[0],argv[2]);
+          ABORT;
+       }
+       if (v2->T.basicType == T_REAL)
+       {
+          Werrprintf("%s: variable \"%s\" must be string type",argv[0],argv[3]);
+          ABORT;
+       }
+    }
 
     /* Open the input file */
     inputFile = fopen(path, "r");
@@ -3028,7 +3586,11 @@ int readfile(int argc, char *argv[], int retc, char *retv[])
       assignString("",v2,0);
 
     /* Read each line */
-    while (priv_getline(inputFile, line1, LINE_LIMIT)) {
+    if (jcampFlag)
+    {
+        numRows = jcamp(inputFile, v1, v2); 
+    }
+    else while (priv_getline(inputFile, line1, LINE_LIMIT)) {
         length = strlen(line1);
         if(length == 0)
             continue;

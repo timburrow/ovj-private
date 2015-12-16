@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /* ghncoca_seq_trosy_4DA.c - auto-calibrated version of the original sequence
 
     This pulse sequence will allow one to perform the following experiment:

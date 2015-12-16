@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
-/* Copyright (c) Varian Assoc., Inc.  All Rights Reserved. */
 
 #ifdef FUNCSELECTION
 IF_FITCODE("shames2"){

@@ -9,7 +9,7 @@ USR_PSG_DIR= $(vnmruser)/psg/
 
 #-----  Normal operational compile flags
 CDEFINE= -DLINUX -DNESSIE -Wno-format
-CFLAGS= -O2 -fPIC -m32 -c
+CFLAGS= -O -fPIC -m32 -c
 CPPFLAGS= -U_FORTIFY_SOURCE
 LDFLAGS= -shared -m32
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(CDEFINE) -c

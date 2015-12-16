@@ -197,6 +197,10 @@ ELSEIF ($arg='install_specs') THEN
       exists('specs_'+$field+'_'+probestyle,'probe_specs'):$et,$template
       if ($et<0.5) then "use generic specs if one for probestyle not found"
          exists('specs_'+$field+'_generic','probe_specs'):$et,$template
+         if ($et<0.5) then
+	   write('line3','Generic targets %s not found in probe_specs directory','specs_'+$field+'_generic')
+           return
+         endif
 	 write('line3','Generic targets installed, edit to values appropriate for probe')
       endif
       

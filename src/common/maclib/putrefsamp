@@ -35,5 +35,8 @@ endif
     $sedcmd1 = `'s/SAMPLE#:.*/SAMPLE#: `+$refloc+`/'`
     $sedcmd2 = `'s/MACRO:.*/MACRO: Aulocref/'`
     $sedcmd3 = `'s/USER:.*/USER: `+operator+` priority/'`
-    shell(`sed -e `+$sedcmd1+` -e `+$sedcmd2+` -e `+$sedcmd3+` `+$sampleinfo+` >> `+$enterQ):$dum
+    $tmpfile=curexp+'/refsamp'
+    shell(`sed -e `+$sedcmd1+` -e `+$sedcmd2+` -e `+$sedcmd3+` `+$sampleinfo+` > `+$tmpfile):$dum
+    autoq('add',$tmpfile)
+    rm($tmpfile):$e
 

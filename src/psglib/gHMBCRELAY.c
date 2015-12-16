@@ -1,7 +1,7 @@
-// Copyright (C) 2015  Stanford University
+// Copyright (C) 2015  University of Oregon
 // You may distribute under the terms of either the GNU General Public
-// License or the Apache License, as specified in the README file.
-// For more information, see the README file.
+// License or the Apache License, as specified in the LICENSE file.
+// For more information, see the LICENSE file.
 /*  HMBCRELAY - From T. Spang & P. Bigler, MRC 2004; 42 p 55-60 */
 /* R Crouch  10 June 2004 */
 /* B Heise  07 April 2010 - include multi-freq. PRESAT */

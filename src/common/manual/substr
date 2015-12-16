@@ -283,3 +283,21 @@ substr	-	pick a substring or word out of a string
     substr('A sentence   without  differing    number  of     spaces','squeeze',' '):n2 
         string n2 = 'A sentence without differing number of spaces'
 
+  Case 8. Remove leading characters from a string
+    substr('string','trim','characters'):$newstring
+    substr('string','trim'):$newstring
+       where string is the string or a string variable
+       'trim' is a keyword for this case. An optional third
+       argument is a list of characters to remove from the beginning
+       of the string. If the third argument is not given, the default
+       set of delimiters of space and tab are used. This command may
+       be used to remove leading whitespace.  It can also remove
+       other characters from the beginning of the string.
+
+  Example
+    substr('   leading whitespace','trim',' \t'):n2 
+        string n2 = 'leading whitespace'
+    substr('   leading whitespace','trim'):n2 
+        string n2 = 'leading whitespace'
+    substr('   /home/vnmr','trim','/ \t'):n2 
+        string n2 = 'home/vnmr'

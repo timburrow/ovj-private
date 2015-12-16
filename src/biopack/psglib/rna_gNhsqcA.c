@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2015  University of Oregon
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Apache License, as specified in the LICENSE file.
+ *
+ * For more information, see the LICENSE file.
+ */
 /*  rna_gNhsqcA.c  - autocalibrated version with pulse shaping "on fly".
 
     HSQC gradient sensitivity enhanced version for N15, with options for

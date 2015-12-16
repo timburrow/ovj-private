@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 #include <iostream>
@@ -1126,7 +1126,7 @@ void DataInfo::addRoi(const char *name, spCoordVector_t data, bool loaded,
 	}
 
 	roiInfo_t info;
-	if (name != "")
+	if ( strcmp(name,"") )
 		info.name = name;
 	else
 		info.name = data->name;

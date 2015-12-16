@@ -157,9 +157,9 @@ IF ($# < 2) THEN
 
    $runstart=''
    if ($Auto='y') then
-  	shell('(cat '+$efile+'.macdir/DATE_runstart)'):$runstart
+  	shell('(cat '+$efile+'.macdir/DATE_runstart | tail -n 1)'):$runstart
    else
-  	shell('(cat '+$efile+'.macdir/DATE_creation)'):$runstart
+  	shell('(cat '+$efile+'.macdir/DATE_creation | tail -n 1)'):$runstart
    endif
    $s1='' $s2=''
    strstr($runstart,'_','last'):$ret,$s1,$s2

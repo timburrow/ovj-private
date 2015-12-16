@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2015  Stanford University
+ * Copyright (C) 2015  University of Oregon
  *
  * You may distribute under the terms of either the GNU General Public
- * License or the Apache License, as specified in the README file.
+ * License or the Apache License, as specified in the LICENSE file.
  *
- * For more information, see the README file.
+ * For more information, see the LICENSE file.
  */
 
 /*-----------------------------------------------
@@ -133,10 +133,16 @@ int  Rflag;
 /* prototypes */
 static void binit(int fileindex);
 static int findblock(int fileindex, int index);
+static int last_vendor_id = 0;
 
 /********************
 *  BEGIN FUNCTIONS  *
 ********************/
+
+int D_getLastVendorId()
+{
+   return(last_vendor_id);
+}
 
 /*---------------------------------------
 |					|
@@ -386,6 +392,7 @@ int fidversion(void *headptr, int headertype, int version)
       }
 
       fidfilehead->vers_id = vendor_id + FID_FILE + VERSION;
+      last_vendor_id = vendor_id;
       if (fidfilehead->status & old_S_complex)	/* old S_COMPLEX */
       {
          fidfilehead->status &= ~(old_S_complex);
@@ -3055,6 +3062,188 @@ int D_zerofillfid(int newnp, char *datapath)
       while (cnt--)
          *ptr++ = 0.0;
       if ( write(tmpfd, (char *)datablock.head, bbytesNew) != bbytesNew )
+      {
+         close(fd);
+         close(tmpfd);
+         releaseAllWithId("downsize");
+         return(D_WRITERR);
+      }
+   }
+   close(fd);
+   close(tmpfd);
+   rename(tmpdatapath,datapath);
+   releaseAllWithId("downsize");
+   return(COMPLETE);
+}
+
+int D_leftshiftfid(int lsFID, char *datapath, int *newnp)
+{
+   char			tmpdatapath[MAXPATH];
+   int			i,
+			fd,
+			np,
+			tmpfd,
+			nblocks,
+			bbytesOrig,
+			bbytesNew,
+			nbheader,
+			nbheaderbytes;
+   int      zeroBytes,
+            dataBytes;
+   dfilehead		datafilehead;
+   dpointers		datablock;
+   float *ptr;
+   float *zeros;
+
+
+   if (lsFID == 0)
+      return(COMPLETE);
+   if ( (fd = open(datapath, O_RDONLY)) < 0 )
+      return(D_OPENERR);
+
+/***********************************
+*  Read in file header and modify  *
+*  for the downsized file.        *
+***********************************/
+
+   if ( read(fd, (char *)(&datafilehead), sizeof(dfilehead))
+		!= sizeof(dfilehead) )
+   {
+      close(fd);
+      return(D_READERR);
+   }
+#ifdef LINUX
+   datafilehead.nblocks = ntohl(datafilehead.nblocks);
+   datafilehead.ntraces = ntohl(datafilehead.ntraces);
+   datafilehead.np = ntohl(datafilehead.np);
+   datafilehead.ebytes = ntohl(datafilehead.ebytes);
+   datafilehead.tbytes = ntohl(datafilehead.tbytes);
+   datafilehead.bbytes = ntohl(datafilehead.bbytes);
+   datafilehead.vers_id = ntohs(datafilehead.vers_id);
+   datafilehead.status = ntohs(datafilehead.status);
+   datafilehead.nbheaders = ntohl(datafilehead.nbheaders);
+#endif
+
+   nblocks = datafilehead.nblocks;
+   nbheader = (datafilehead.nbheaders & NBMASK);
+   nbheaderbytes = nbheader * sizeof(dblockhead);
+   bbytesOrig = datafilehead.bbytes;
+   np = datafilehead.np;
+   if (lsFID < 0)
+   {
+      dataBytes = datafilehead.np * datafilehead.ebytes * datafilehead.ntraces;
+   }
+   else
+   {
+      dataBytes = (datafilehead.np - (lsFID*2)) * datafilehead.ebytes * datafilehead.ntraces;
+   }
+
+   sprintf(tmpdatapath,"%s.tmp",datapath);
+   if ( (tmpfd = open(tmpdatapath, O_WRONLY | O_CREAT, 0666)) < 0 )
+   {
+      close(fd);
+      return(D_OPENERR);
+   }
+   datafilehead.np = np - (lsFID*2);
+   datafilehead.tbytes = datafilehead.ebytes*datafilehead.np;
+   datafilehead.bbytes = datafilehead.tbytes*datafilehead.ntraces +
+				nbheaderbytes;
+   bbytesNew = datafilehead.bbytes;
+  *newnp = datafilehead.np;
+
+#ifdef LINUX
+   datafilehead.nblocks = htonl(datafilehead.nblocks);
+   datafilehead.ntraces = htonl(datafilehead.ntraces);
+   datafilehead.np = htonl(datafilehead.np);
+   datafilehead.ebytes = htonl(datafilehead.ebytes);
+   datafilehead.tbytes = htonl(datafilehead.tbytes);
+   datafilehead.bbytes = htonl(datafilehead.bbytes);
+   datafilehead.vers_id = htons(datafilehead.vers_id);
+   datafilehead.status = htons(datafilehead.status);
+   datafilehead.nbheaders = htonl(datafilehead.nbheaders);
+#endif
+/************************************
+*  Seek to start of file and write  *
+*  out the new file header.         *
+************************************/
+
+   if ( write(tmpfd, (char *)(&datafilehead), sizeof(dfilehead) )
+		!= sizeof(dfilehead) )
+   {
+      close(fd);
+      close(tmpfd);
+      return(D_WRITERR);
+   }
+
+/******************************
+*  Allocate memory for data.  *
+******************************/
+
+   if ( (datablock.head = (dblockhead *) allocateWithId(bbytesOrig,
+		"downsize")) == NULL )
+   {
+      close(fd);
+      close(tmpfd);
+      return(D_NOALLOC);
+   }
+
+   datablock.data = (float *) (datablock.head + nbheader);
+   if (lsFID < 0)
+   {
+      float *zptr;
+      int numZeros = -2 * lsFID;
+      zeroBytes = numZeros * sizeof(float);
+      if ( (zeros = (float *) allocateWithId(zeroBytes, "downsize")) == NULL )
+      {
+         close(fd);
+         close(tmpfd);
+         releaseAllWithId("downsize");
+         return(D_NOALLOC);
+      }
+      zptr = zeros;
+      while (numZeros--)
+         *zptr++ = 0.0;
+   }
+   else
+   {
+      zeros = NULL;
+      zeroBytes = 0;
+   }
+
+//  read original data and write out truncated data
+
+   for (i = 0; i < nblocks; i++)
+   {
+      if ( read(fd, (char *)datablock.head, bbytesOrig) != bbytesOrig )
+      {
+         close(fd);
+         close(tmpfd);
+         releaseAllWithId("downsize");
+         return(D_READERR);
+      }
+      if ( write(tmpfd, (char *)datablock.head, sizeof(dblockhead)) != sizeof(dblockhead) )
+      {
+         close(fd);
+         close(tmpfd);
+         releaseAllWithId("downsize");
+         return(D_WRITERR);
+      }
+      if (lsFID < 0)
+      {
+         if ( write(tmpfd, (char *)zeros, zeroBytes) != zeroBytes )
+         {
+            close(fd);
+            close(tmpfd);
+            releaseAllWithId("downsize");
+            return(D_WRITERR);
+         }
+         ptr= datablock.data;
+      }
+      else
+      {
+         ptr = datablock.data + (lsFID*2);
+      }
+      if ( write(tmpfd, (char *)ptr, dataBytes) != dataBytes )
       {
          close(fd);
          close(tmpfd);
